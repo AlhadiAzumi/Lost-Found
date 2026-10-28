@@ -35,11 +35,11 @@ Proyek ini dikembangkan untuk memenuhi tugas mata kuliah **Rekayasa Perangkat Lu
 
 1. Clone repositori ini:
    ```bash
-   git clone https://github.com/username-kamu/nama-repo-kamu.git
+   git clone https://github.com/AlhadiAzumi/Lost-Found.git
    ```
 2. Masuk ke direktori proyek:
    ```bash
-   cd nama-repo-kamu
+   cd Lost-Found
    ```
 3. Instal dependensi Composer:
    ```bash
