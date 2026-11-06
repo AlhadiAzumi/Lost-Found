@@ -69,7 +69,7 @@ class ItemReportController extends Controller
             'status'            => 'pending',
         ]);
 
-        return redirect()->route('items.show', $item)
+        return redirect()->route('items.show', ['item' => $item])
             ->with('success', 'Laporan berhasil dikirim dan menunggu moderasi petugas.');
     }
 }

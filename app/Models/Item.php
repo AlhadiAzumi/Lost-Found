@@ -4,11 +4,14 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\BelongsToCampus;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class Item extends Model
 {
+    use BelongsToCampus;
+
     protected $fillable = [
         'user_id',
         'category_id',

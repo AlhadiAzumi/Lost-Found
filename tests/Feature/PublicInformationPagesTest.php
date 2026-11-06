@@ -2,10 +2,13 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class PublicInformationPagesTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_all_public_information_pages_are_available_to_guests(): void
     {
         $pages = [

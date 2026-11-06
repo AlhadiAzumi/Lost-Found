@@ -109,7 +109,7 @@
                                     Ini adalah barang temuan yang kamu laporkan sendiri.
                                 </div>
                             @else
-                                <a href="{{ route('claims.create', $item) }}" class="btn btn--primary btn--block btn--lg" style="justify-content:center;">
+                                <a href="{{ route('claims.create', ['item' => $item]) }}" class="btn btn--primary btn--block btn--lg" style="justify-content:center;">
                                     <x-icon name="handshake" :size="20" /> Ajukan Klaim Kepemilikan
                                 </a>
                             @endif

@@ -3,7 +3,7 @@
 @php $isFound = in_array($item->type, ['found', 'ditemukan'], true); @endphp
 
 <article class="card item">
-    <a href="{{ route('items.show', $item) }}" class="item__photo" aria-label="Lihat detail {{ $item->name }}">
+    <a href="{{ route('items.show', ['item' => $item]) }}" class="item__photo" aria-label="Lihat detail {{ $item->name }}">
         <img src="{{ $item->photo_url }}" alt="{{ $item->name }}" loading="lazy">
         <div class="item__type">
             <x-badge :icon="$isFound ? 'search-check' : 'search'"

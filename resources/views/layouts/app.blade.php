@@ -24,6 +24,11 @@
                 <a href="{{ route('home') }}" class="nav__link {{ request()->routeIs('home') ? 'is-active' : '' }}">
                     Beranda
                 </a>
+                @if (isset($currentCampus))
+                    <a href="{{ route('campuses.index') }}" class="nav__link nav__link--campus" title="Ganti kampus">
+                        {{ $currentCampus->name }}
+                    </a>
+                @endif
                 <a href="{{ route('catalog.index') }}" class="nav__link {{ request()->routeIs('catalog.*') ? 'is-active' : '' }}">
                     Katalog
                 </a>
@@ -62,6 +67,11 @@
                     @if (in_array(auth()->user()->role, ['admin', 'satpam'], true))
                         <a href="{{ route('admin.dashboard') }}" class="nav__link nav__link--admin {{ request()->routeIs('admin.*') ? 'is-active' : '' }}">
                             Panel Admin
+                        </a>
+                    @endif
+                    @if (auth()->user()->role === 'admin' && filled(config('platform.admin_email')) && strcasecmp(auth()->user()->email, config('platform.admin_email')) === 0)
+                        <a href="{{ route('platform.campuses.index', ['campus' => null]) }}" class="nav__link nav__link--admin {{ request()->routeIs('platform.campuses.*') ? 'is-active' : '' }}">
+                            Kelola Kampus
                         </a>
                     @endif
                 @endauth
@@ -112,6 +122,19 @@
                 <x-icon name="heart-handshake" :size="18" />
                 Beranda
             </a>
+            @if (isset($currentCampus))
+                <a href="{{ route('campuses.index') }}" class="nav__drawer-link">
+                    <x-icon name="map-pin" :size="18" />
+                    Ganti Kampus ({{ $currentCampus->name }})
+                </a>
+            @endif
+            @auth
+                @if (auth()->user()->role === 'admin' && filled(config('platform.admin_email')) && strcasecmp(auth()->user()->email, config('platform.admin_email')) === 0)
+                    <a href="{{ route('platform.campuses.index', ['campus' => null]) }}" class="nav__drawer-link">
+                        Kelola Kampus
+                    </a>
+                @endif
+            @endauth
             <a href="{{ route('catalog.index') }}" class="nav__drawer-link {{ request()->routeIs('catalog.*') ? 'is-active' : '' }}">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 15h18M9 3v18M15 3v18" opacity=".3"/><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
                 Katalog Barang

@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="page-wrap page-wrap--narrow">
-    <a href="{{ route('items.show', $item) }}" class="btn btn--ghost" style="margin-bottom:20px; display:inline-flex; align-items:center; gap:8px; padding-left:0;">
+    <a href="{{ route('items.show', ['item' => $item]) }}" class="btn btn--ghost" style="margin-bottom:20px; display:inline-flex; align-items:center; gap:8px; padding-left:0;">
         <x-icon name="arrow-left" :size="18" /> Batal &amp; Kembali
     </a>
 
@@ -28,7 +28,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('claims.store', $item) }}" enctype="multipart/form-data"
+        <form method="POST" action="{{ route('claims.store', ['item' => $item]) }}" enctype="multipart/form-data"
               style="display:flex; flex-direction:column; gap:20px;">
             @csrf
 

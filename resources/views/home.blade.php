@@ -39,7 +39,7 @@
                     </div>
                     <div class="home-showcase__items">
                         @forelse ($recentItems as $item)
-                            <a class="home-showcase__item" href="{{ route('items.show', $item) }}">
+                            <a class="home-showcase__item" href="{{ route('items.show', ['item' => $item]) }}">
                                 <span class="home-showcase__item-icon {{ in_array($item->type, ['found', 'ditemukan'], true) ? 'is-found' : '' }}">
                                     <x-icon :name="$item->category->icon ?: 'tag'" :size="19" />
                                 </span>

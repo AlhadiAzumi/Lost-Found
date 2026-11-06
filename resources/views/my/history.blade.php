@@ -59,7 +59,7 @@
                                 </x-badge>
                             </div>
                             <h3>
-                                <a href="{{ route('items.show', $item) }}">{{ $item->title }}</a>
+                                <a href="{{ route('items.show', ['item' => $item]) }}">{{ $item->title }}</a>
                             </h3>
                             <div class="history-info__meta">
                                 <x-icon name="map-pin" :size="13" />
@@ -106,7 +106,7 @@
                         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:16px; flex-wrap:wrap;">
                             <div>
                                 <h3 style="font-size:17px; font-weight:800; margin-bottom:4px;">
-                                    <a href="{{ route('items.show', $claim->item) }}" style="color:var(--ink);">
+                                    <a href="{{ route('items.show', ['item' => $claim->item]) }}" style="color:var(--ink);">
                                         {{ $claim->item->title ?? 'Barang' }}
                                     </a>
                                 </h3>

@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Concerns\BelongsToCampus;
 
 class Handover extends Model
 {
+    use BelongsToCampus;
+
     protected $fillable = [
         'claim_id',
         'item_id',
@@ -40,4 +43,3 @@ class Handover extends Model
         return $this->belongsTo(User::class, 'handed_over_by');
     }
 }
-

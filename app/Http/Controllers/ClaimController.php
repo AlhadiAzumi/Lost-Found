@@ -13,11 +13,11 @@ class ClaimController extends Controller
     public function create(Item $item)
     {
         if (!in_array($item->type, ['found', 'ditemukan']) || !in_array($item->status, ['approved', 'disetujui'])) {
-            return redirect()->route('items.show', $item)->with('error', 'Barang ini tidak dapat diklaim.');
+            return redirect()->route('items.show', ['item' => $item])->with('error', 'Barang ini tidak dapat diklaim.');
         }
 
         if (auth()->id() === $item->user_id) {
-            return redirect()->route('items.show', $item)->with('error', 'Kamu tidak dapat mengklaim barang yang kamu laporkan sendiri.');
+            return redirect()->route('items.show', ['item' => $item])->with('error', 'Kamu tidak dapat mengklaim barang yang kamu laporkan sendiri.');
         }
 
         // Cek apakah user sudah punya klaim pending pada item ini

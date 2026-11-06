@@ -18,6 +18,13 @@ Proyek ini dikembangkan untuk memenuhi tugas mata kuliah **Rekayasa Perangkat Lu
 - **Verifikasi Klaim:** Jawaban keamanan dicocokkan tanpa menyimpan jawaban asli; petugas juga memeriksa bukti kepemilikan.
 - **Manajemen Serah Terima:** Sistem verifikasi kode unik saat serah terima barang di pos satpam.
 
+### 🏫 Portal Multi-Kampus
+- Satu aplikasi melayani beberapa kampus dengan data akun, laporan, klaim, dan serah terima yang dipisahkan.
+- Pengguna memilih portal dari halaman `/`; setiap portal memiliki URL `/kampus/{slug}`.
+- Admin platform dapat membuat dan mengaktifkan/nonaktifkan portal melalui menu **Kelola Kampus** di web.
+- Untuk menyiapkan admin platform pertama kali, buat akun admin kampus, lalu tetapkan emailnya sebagai `PLATFORM_ADMIN_EMAIL` di environment deployment. Perintah `campus:promote-admin` dapat digunakan untuk memberikan peran admin kampus; akses kelola kampus tetap dibatasi ke email platform admin yang dikonfigurasi.
+- Perintah `campus:create` tetap tersedia sebagai opsi untuk pengelolaan melalui terminal.
+
 ## 🛠️ Tech Stack
 - **Framework:** Laravel
 - **Database:** Supabase (PostgreSQL)
@@ -66,11 +73,14 @@ Proyek ini dikembangkan untuk memenuhi tugas mata kuliah **Rekayasa Perangkat Lu
    ```bash
    php artisan migrate
    ```
+   Migrasi menyiapkan portal awal dari `DEFAULT_CAMPUS_NAME` dan `DEFAULT_CAMPUS_SLUG` (default: `Kampus Utama` dan `kampus-utama`). Tetapkan nilai tersebut sebelum migrasi pertama bila ingin mengganti portal awal.
 8. Jalankan server lokal:
    ```bash
    php artisan serve
    ```
-Aplikasi dapat diakses melalui `http://localhost:8000`.
+Aplikasi dapat diakses melalui `http://localhost:8000`; halaman awal menampilkan pilihan kampus dan portal default berada di `/kampus/kampus-utama`.
+
+Untuk menyiapkan pengelola platform, tetapkan `PLATFORM_ADMIN_EMAIL=email-admin@domain.ac.id` di `.env` lokal atau Environment Variables deployment. Email itu harus dimiliki akun dengan role `admin`; gunakan perintah `campus:promote-admin` satu kali bila akun belum menjadi admin. Setelah login, pengelola dapat membuka **Kelola Kampus** dari menu dan membuat portal tanpa perintah terminal. Pengelolaan terminal tetap tersedia melalui `campus:create`.
 
 ## Deploy demo ke Vercel
 

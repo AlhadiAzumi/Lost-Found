@@ -84,7 +84,7 @@
                 </div>
 
                 @if ($claim->status === 'pending')
-                    <form method="POST" action="{{ route('admin.claims.verify', $claim) }}" class="admin-claim-actions">
+                    <form method="POST" action="{{ route('admin.claims.verify', ['claim' => $claim]) }}" class="admin-claim-actions">
                         @csrf
                         <input type="text" name="admin_note" placeholder="Catatan admin (wajib bila menolak)..." class="input admin-claim-actions__note">
                         <button type="submit" name="action" value="reject" class="btn btn--ghost" style="color: #dc2626; border-color: #dc2626;">Tolak Klaim</button>

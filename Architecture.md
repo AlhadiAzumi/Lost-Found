@@ -7,12 +7,12 @@
 
 ## 1. Gambaran Umum
 
-Aplikasi web monolitik dengan pola **MVC** di atas **Laravel (PHP)**, menyimpan data di **PostgreSQL (Supabase)**. Akses dibatasi per peran memakai **Laravel Middleware**. Foto dan bukti disimpan di layanan penyimpanan berkas.
+Aplikasi web monolitik multi-tenant dengan pola **MVC** di atas **Laravel (PHP)**, menyimpan data di **PostgreSQL (Supabase)**. Satu deployment melayani banyak kampus melalui path `/kampus/{slug}`; tenant middleware dan Eloquent scopes membatasi data pada kampus aktif. Akses dibatasi per peran memakai **Laravel Middleware**. Foto dan bukti disimpan di layanan penyimpanan berkas.
 
 ```
 ┌─────────────┐   HTTPS    ┌──────────────────────────────────┐
 │  Browser    │ ─────────▶ │  Laravel App (MVC)               │
-│ (Desktop/HP)│ ◀───────── │  Routes → Middleware → Controller│
+│ (Desktop/HP)│ ◀───────── │  Routes → Tenant/Auth Middleware → Controller│
 └─────────────┘            │  → Service → Model → View (Blade)│
                            └──────┬──────────────┬────────────┘
                                   │ pgsql (SSL)  │ filesystem / S3 API
@@ -93,18 +93,16 @@ tests/Feature, tests/Unit
 ### 5.1 ERD
 
 ```
-users 1───* items *───1 categories
-  │            │  *───1 locations
-  │            │
-  │            1
-  │            │
-  └───* claims *┘
-          │
-          1
-          │ 0..1
-       handovers *───1 users (admin)
+campuses 1───* users 1───* items *───1 categories
+    │                       │
+    ├──────────────* items  │
+    │                       1
+    ├──────────────* claims *───1 users
+    │                   │
+    └──────────────* handovers (via claims)
 
-users 1───* notifications
+users 1───* activity_logs
+items *───* item_matches
 ```
 
 ### 5.2 Skema Tabel
@@ -159,7 +157,11 @@ users 1───* notifications
 
 **notifications**: `id`, `user_id`, `message`, `read_at null`, `created_at`.
 
-### 5.3 Status (Enum)
+### 5.3 Isolasi Multi-Kampus
+
+Tabel `campuses` menyimpan nama, slug portal, dan status aktif. Tabel `users`, `items`, `claims`, dan `handovers` memiliki `campus_id`. Middleware menetapkan konteks dari URL `/kampus/{slug}` sebelum route model binding; global scope menerapkan filter tenant dan pengisian tenant pada record baru. Akun hanya dapat masuk dan menggunakan workflow pada kampusnya, termasuk panel admin. Kategori tetap menjadi data master bersama.
+
+### 5.4 Status (Enum)
 
 | Objek | Nilai |
 |---|---|
@@ -168,7 +170,7 @@ users 1───* notifications
 
 Tampilan bahasa Indonesia dipetakan di enum (`label()`), bukan disimpan sebagai teks di database.
 
-### 5.4 State Machine Item
+### 5.5 State Machine Item
 
 ```
 pending ──approve──▶ approved ──claim submitted──▶ claim_in_progress ──handover──▶ returned

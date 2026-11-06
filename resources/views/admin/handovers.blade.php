@@ -62,7 +62,7 @@
                 </div>
 
                 @if ($claimToHandover->status === 'approved' && !$claimToHandover->handover)
-                    <form method="POST" action="{{ route('admin.handovers.process', $claimToHandover) }}">
+                    <form method="POST" action="{{ route('admin.handovers.process', ['claim' => $claimToHandover]) }}">
                         @csrf
                         <input type="hidden" name="code" value="{{ $claimToHandover->handover_code }}">
                         <div class="admin-handover-notes">

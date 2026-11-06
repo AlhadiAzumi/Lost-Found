@@ -19,6 +19,8 @@ Campus Lost & Found Portal adalah aplikasi web untuk melaporkan barang hilang, m
 
 **Value proposition:** *"Barang hilang lebih cepat kembali ke pemilik aslinya — tanpa risiko klaim palsu."*
 
+Satu deployment aplikasi dapat melayani beberapa kampus melalui portal terpisah. Setiap akun, laporan, klaim, dan serah terima hanya terlihat di portal kampus tempat data tersebut dibuat.
+
 ## 2. Latar Belakang & Masalah
 
 | Masalah saat ini | Dampak |
@@ -67,11 +69,12 @@ Pengunjung belum login: boleh melihat katalog terbatas, registrasi, dan login.
 - Moderasi laporan, verifikasi klaim, Kode Serah Terima, riwayat serah terima
 - Dashboard statistik admin, data master kategori & lokasi
 - Notifikasi (in-app; email opsional)
+- Portal multi-kampus berbasis path `/kampus/{slug}` dengan pemisahan data antarkampus
 
 ### 5.2 Out of Scope (v1.0)
 Aplikasi mobile native · pembayaran/transaksi · integrasi SSO/SIAKAD · pelacakan GPS/IoT.
 
-**Navigasi publik:** `/` adalah beranda pengantar; katalog dengan pencarian dan filter tersedia di `/catalog`. Halaman informasi layanan tersedia di `/tentang`, `/panduan`, `/keamanan`, `/privasi`, `/bantuan`, dan `/ketentuan`.
+**Navigasi publik:** `/` menampilkan pilihan portal kampus. Beranda, katalog, dan halaman informasi berada di bawah prefix `/kampus/{slug}`; katalog dengan pencarian dan filter tersedia di `/kampus/{slug}/catalog`.
 
 Halaman informasi menjelaskan penggunaan layanan untuk warga Politeknik Negeri Lhokseumawe tanpa menyatakan platform sebagai portal resmi sebelum ada persetujuan institusi. Kanal kontak yang ditampilkan harus diverifikasi pengelola; kebijakan retensi dan penghapusan data perlu disahkan sebelum penggunaan produksi.
 

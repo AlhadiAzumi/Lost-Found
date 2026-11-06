@@ -60,13 +60,13 @@
                         </td>
                         <td style="padding: 14px 8px; text-align: right;">
                             @if ($item->status === 'pending')
-                                <form method="POST" action="{{ route('admin.reports.status', $item) }}" class="admin-report-actions">
+                                <form method="POST" action="{{ route('admin.reports.status', ['item' => $item]) }}" class="admin-report-actions">
                                     @csrf
                                     <input type="hidden" name="status" value="rejected">
                                     <input type="text" name="rejection_reason" placeholder="Alasan penolakan" required class="input admin-report-actions__reason">
                                     <button type="submit" class="btn btn--ghost admin-report-actions__reject">Tolak</button>
                                 </form>
-                                <form method="POST" action="{{ route('admin.reports.status', $item) }}" class="admin-report-actions">
+                                <form method="POST" action="{{ route('admin.reports.status', ['item' => $item]) }}" class="admin-report-actions">
                                     @csrf
                                     <input type="hidden" name="status" value="approved">
                                     <button type="submit" class="btn btn--primary admin-report-actions__approve">Setujui</button>
