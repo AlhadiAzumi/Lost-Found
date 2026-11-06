@@ -118,7 +118,7 @@
                     </div>
                 @else
                     <div style="padding: 14px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; color: #991b1b; font-size: 14px;">
-                        💡 <strong>Catatan:</strong> Jika kamu menemukan barang ini di kampus, silakan serahkan ke pos satpam atau buat laporan penemuan barang.
+                        <strong>Catatan:</strong> Jika kamu menemukan barang ini di kampus, silakan serahkan ke pos satpam atau buat laporan penemuan barang.
                     </div>
                 @endif
             </div>

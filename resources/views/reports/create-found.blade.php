@@ -63,7 +63,7 @@
             {{-- Security Question Box --}}
             <div style="padding: 18px; background: #f0fdf4; border: 1.5px solid #16a34a; border-radius: 14px;">
                 <strong style="display: block; color: #166534; font-size: 15px; margin-bottom: 4px;">
-                    🛡️ Pertanyaan Keamanan (Security Question) *
+                    Pertanyaan Keamanan (Security Question) *
                 </strong>
                 <p style="margin: 0 0 12px; font-size: 13px; color: #15803d; line-height: 1.4;">
                     Buat pertanyaan verifikasi yang hanya bisa dijawab oleh pemilik asli barang ini (misalnya: "Berapa kapasitas flashdisk ini?" atau "Ada stiker gambar apa di casing HP-nya?").

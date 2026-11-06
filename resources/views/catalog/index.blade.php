@@ -19,7 +19,7 @@
 
                 <div class="cta-card">
                     <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                        <span style="font-size: 20px;">🎒</span>
+                        <x-icon name="plus-circle" :size="20" />
                         <h2>Lapor Cepat</h2>
                     </div>
                     <p>Bantu sesama warga kampus lewat satu laporan singkat.</p>
@@ -116,7 +116,7 @@
         <section class="results" aria-label="Daftar barang">
             {{-- Tab Filter Type --}}
             <nav class="tabs">
-                @foreach ([['value' => null, 'label' => 'Semua Barang'], ['value' => 'hilang', 'label' => '🔍 Barang Hilang'], ['value' => 'ditemukan', 'label' => '✨ Barang Temuan']] as $tab)
+                @foreach ([['value' => null, 'label' => 'Semua Barang'], ['value' => 'hilang', 'label' => 'Barang Hilang'], ['value' => 'ditemukan', 'label' => 'Barang Temuan']] as $tab)
                     <a href="{{ route('catalog.index', array_filter([...request()->except('type', 'page'), 'type' => $tab['value']])) }}"
                        class="tab {{ $filters['type'] === $tab['value'] ? 'is-active' : '' }}">
                         {{ $tab['label'] }}
@@ -142,8 +142,8 @@
 
             @if ($items->isEmpty())
                 <div class="card empty" style="border: 2px dashed #cbd5e1; border-radius: 20px; background: #fff; padding: 48px 24px;">
-                    <span style="font-size: 40px; display: block; margin-bottom: 12px;">🔍</span>
-                    <h3>Belum Ada Barang yang Cocok</h3>
+                    <x-icon name="search" :size="36" />
+                    <h3 style="margin-top: 12px;">Belum Ada Barang yang Cocok</h3>
                     <p style="color: var(--muted); margin: 0 0 20px;">
                         Coba gunakan kata kunci lain atau ubah pengaturan filter di sebelah kiri.
                     </p>

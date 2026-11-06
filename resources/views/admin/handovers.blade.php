@@ -6,7 +6,7 @@
 <div class="container" style="max-width: 900px; margin: 36px auto; padding: 0 16px;">
     <div style="margin-bottom: 24px;">
         <a href="{{ route('admin.dashboard') }}" style="font-size: 13px; font-weight: 700; color: #111;">&larr; Kembali ke Dashboard</a>
-        <h1 style="font-size: 26px; font-weight: 800; margin: 6px 0 0; color: #111;">🔑 Validasi & Serah Terima Barang</h1>
+        <h1 style="font-size: 26px; font-weight: 800; margin: 6px 0 0; color: #111;">Validasi & Serah Terima Barang</h1>
         <p style="margin: 0; color: #6b7280; font-size: 14px;">Masukkan kode serah terima yang ditunjukkan oleh pemilik barang di pos satpam.</p>
     </div>
 
@@ -66,7 +66,7 @@
                         </div>
 
                         <button type="submit" class="btn btn--primary" style="width: 100%; padding: 14px; font-size: 16px;">
-                            🤝 Konfirmasi & Serahkan Barang
+                            Konfirmasi & Serahkan Barang
                         </button>
                     </form>
                 @else

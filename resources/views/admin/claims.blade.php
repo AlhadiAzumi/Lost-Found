@@ -60,7 +60,7 @@
                         <span style="font-size: 12px; font-weight: 700; color: #6b7280; display: block; margin-bottom: 4px;">BUKTI PENDUKUNG:</span>
                         @if ($claim->proof_image)
                             <a href="{{ Storage::url($claim->proof_image) }}" target="_blank" style="font-size: 13px; font-weight: 700; color: #326bec;">
-                                📄 Buka Berkas / Foto Bukti
+                                Buka Berkas / Foto Bukti
                             </a>
                         @else
                             <span style="font-size: 13px; color: #9ca3af;">Tidak melampirkan berkas bukti</span>

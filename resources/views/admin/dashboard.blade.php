@@ -16,7 +16,7 @@
         <div style="display: flex; gap: 10px;">
             <a href="{{ route('admin.reports') }}" class="btn btn--ghost">Moderasi Laporan</a>
             <a href="{{ route('admin.claims') }}" class="btn btn--ghost">Verifikasi Klaim</a>
-            <a href="{{ route('admin.handovers') }}" class="btn btn--primary">🔑 Serah Terima</a>
+            <a href="{{ route('admin.handovers') }}" class="btn btn--primary">Serah Terima</a>
         </div>
     </div>
 
@@ -88,7 +88,7 @@
                     <div style="padding: 12px; border: 1.5px solid #e5e7eb; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <strong style="display: block; font-size: 14px;">{{ $item->title }}</strong>
-                            <span style="font-size: 12px; color: #6b7280;">📍 {{ $item->location }}</span>
+                            <span style="font-size: 12px; color: #6b7280;">Lokasi: {{ $item->location }}</span>
                         </div>
                         <x-badge icon="circle-check" color="#d1fae8">{{ ucfirst($item->status) }}</x-badge>
                     </div>

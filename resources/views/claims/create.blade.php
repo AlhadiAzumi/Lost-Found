@@ -51,7 +51,7 @@
             </div>
 
             <div style="padding: 12px; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; font-size: 13px; color: #92400e;">
-                ⚠️ <strong>Penting:</strong> Percobaan klaim palsu dapat dikenakan sanksi tata tertib kampus. Data klaim dan akunmu akan diverifikasi oleh petugas satpam.
+                <strong>Peringatan:</strong> Percobaan klaim palsu dapat dikenakan sanksi tata tertib kampus. Data klaim dan akunmu akan diverifikasi oleh petugas satpam.
             </div>
 
             <button type="submit" class="btn btn--primary" style="padding: 14px; font-size: 16px; margin-top: 8px;">

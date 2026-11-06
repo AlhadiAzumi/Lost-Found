@@ -38,7 +38,7 @@
                     </a>
                     @if (auth()->user()->role === 'admin')
                         <a href="{{ route('admin.dashboard') }}" class="nav__link nav__link--admin {{ request()->routeIs('admin.*') ? 'is-active' : '' }}">
-                            🛡️ Panel Admin
+                            Panel Admin
                         </a>
                     @endif
                 @endauth

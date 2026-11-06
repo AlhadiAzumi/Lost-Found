@@ -59,7 +59,7 @@
                             <h3 style="margin: 0 0 6px; font-size: 17px; font-weight: 800;">
                                 <a href="{{ route('items.show', $item) }}" style="color: #111; text-decoration: none;">{{ $item->title }}</a>
                             </h3>
-                            <span style="font-size: 13px; color: #4b5563;">📍 {{ $item->location }}</span>
+                            <span style="font-size: 13px; color: #4b5563;">Lokasi: {{ $item->location }}</span>
                         </div>
 
                         <div>
@@ -121,7 +121,7 @@
                                     {{ $claim->handover_code }}
                                 </div>
                                 <p style="margin: 0; font-size: 13px; color: #3f6212;">
-                                    📌 Tunjukkan kode unik ini beserta <strong>Kartu Tanda Mahasiswa (KTM)</strong> ke petugas Pos Satpam untuk mengambil fisik barang.
+                                    Tunjukkan kode unik ini beserta <strong>Kartu Tanda Mahasiswa (KTM)</strong> ke petugas Pos Satpam untuk mengambil fisik barang.
                                 </p>
                             </div>
                         @elseif ($claim->status === 'rejected')
