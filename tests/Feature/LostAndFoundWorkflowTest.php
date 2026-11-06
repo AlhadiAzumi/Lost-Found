@@ -65,6 +65,19 @@ class LostAndFoundWorkflowTest extends TestCase
             ->assertOk();
     }
 
+    public function test_admin_pages_show_navigation_to_handover_processing(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin);
+
+        foreach (['admin.dashboard', 'admin.reports', 'admin.claims', 'admin.handovers'] as $route) {
+            $this->get(route($route))
+                ->assertOk()
+                ->assertSee(route('admin.handovers'))
+                ->assertSee('Serah Terima');
+        }
+    }
+
     public function test_a_claim_requires_a_matching_security_answer_and_a_valid_handover_code(): void
     {
         $item = $this->createFoundItem('Blue Wallet', 'a campus card');

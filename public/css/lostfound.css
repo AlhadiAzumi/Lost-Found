@@ -470,6 +470,39 @@ body:not(.home-page) main::before {
   flex: 0 0 16px;
 }
 
+.admin-nav {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 24px;
+  padding: 5px;
+  overflow-x: auto;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.8);
+  scrollbar-width: thin;
+}
+
+.admin-nav__link {
+  flex: 0 0 auto;
+  padding: 9px 13px;
+  border-radius: 10px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-nav__link:hover {
+  background: #f1f5f9;
+  color: var(--ink);
+}
+
+.admin-nav__link.is-active {
+  background: var(--lime);
+  color: var(--ink);
+}
+
 /* ==========================================================================
    Buttons
    ========================================================================== */

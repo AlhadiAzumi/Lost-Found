@@ -13,12 +13,9 @@
             <h1 style="font-size: 26px; font-weight: 800; margin: 0; color: #111;">Dashboard Pengawasan Kampus</h1>
         </div>
 
-        <div style="display: flex; gap: 10px;">
-            <a href="{{ route('admin.reports') }}" class="btn btn--ghost">Moderasi Laporan</a>
-            <a href="{{ route('admin.claims') }}" class="btn btn--ghost">Verifikasi Klaim</a>
-            <a href="{{ route('admin.handovers') }}" class="btn btn--primary">Serah Terima</a>
-        </div>
     </div>
+
+    @include('admin.navigation')
 
     @if (session('success'))
         <div class="card panel panel--mint" style="margin-bottom: 24px; padding: 16px;">

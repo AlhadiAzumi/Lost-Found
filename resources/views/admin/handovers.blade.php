@@ -10,6 +10,8 @@
         <p style="margin: 0; color: #6b7280; font-size: 14px;">Masukkan kode serah terima yang ditunjukkan oleh pemilik barang di pos satpam.</p>
     </div>
 
+    @include('admin.navigation')
+
     @if (session('success'))
         <div class="card panel panel--mint" style="margin-bottom: 24px; padding: 16px;">
             <strong>✓ Berhasil!</strong> {{ session('success') }}

@@ -11,6 +11,8 @@
         </div>
     </div>
 
+    @include('admin.navigation')
+
     @if (session('success'))
         <div class="card panel panel--mint" style="margin-bottom: 24px; padding: 16px;">
             <strong>✓ Berhasil!</strong> {{ session('success') }}
