@@ -87,7 +87,7 @@
             </div>
 
             {{-- Hamburger (mobile) --}}
-            <button class="nav__hamburger" id="navHamburger" aria-label="Buka menu" aria-expanded="false">
+            <button class="nav__hamburger" id="navHamburger" type="button" aria-label="Buka menu" aria-expanded="false" aria-controls="navDrawer">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
                 </svg>
@@ -101,7 +101,7 @@
         <div class="nav__drawer-panel">
             <div class="nav__drawer-close">
                 <strong>Menu</strong>
-                <button id="navDrawerClose" aria-label="Tutup menu">
+                <button id="navDrawerClose" type="button" aria-label="Tutup menu">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M18 6 6 18M6 6l12 12"/>
                     </svg>
@@ -233,17 +233,31 @@
             drawer.classList.add('is-open');
             drawer.setAttribute('aria-hidden', 'false');
             hamburger.setAttribute('aria-expanded', 'true');
+            hamburger.setAttribute('aria-label', 'Tutup menu');
             document.body.style.overflow = 'hidden';
+            closeBtn.focus();
         }
 
         function closeDrawer() {
+            if (!drawer.classList.contains('is-open')) return;
+
             drawer.classList.remove('is-open');
             drawer.setAttribute('aria-hidden', 'true');
             hamburger.setAttribute('aria-expanded', 'false');
+            hamburger.setAttribute('aria-label', 'Buka menu');
             document.body.style.overflow = '';
+            hamburger.focus();
         }
 
-        if (hamburger) hamburger.addEventListener('click', openDrawer);
+        if (hamburger && drawer && overlay && closeBtn) {
+            hamburger.addEventListener('click', function() {
+                if (hamburger.getAttribute('aria-expanded') === 'true') {
+                    closeDrawer();
+                } else {
+                    openDrawer();
+                }
+            });
+        }
         if (overlay)   overlay.addEventListener('click', closeDrawer);
         if (closeBtn)  closeBtn.addEventListener('click', closeDrawer);
 

@@ -340,7 +340,10 @@ body:not(.home-page) main::before {
 .nav__drawer {
   display: none;
   position: fixed;
-  inset: 0;
+  top: var(--nav-wrapper-height);
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 999;
 }
 
@@ -354,16 +357,17 @@ body:not(.home-page) main::before {
   position: absolute;
   top: 0;
   right: 0;
-  width: min(320px, 85vw);
+  width: min(340px, calc(100vw - 64px));
   height: 100%;
   background: var(--white);
   border-left: 2px solid var(--ink);
   box-shadow: -4px 0 0 var(--ink);
   display: flex;
   flex-direction: column;
-  padding: 24px 20px;
-  gap: 8px;
+  padding: 16px;
+  gap: 4px;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .nav__drawer.is-open {
@@ -374,8 +378,8 @@ body:not(.home-page) main::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
+  margin-bottom: 8px;
+  padding-bottom: 12px;
   border-bottom: 1.5px solid #e5e7eb;
 }
 
@@ -399,10 +403,11 @@ body:not(.home-page) main::before {
 .nav__drawer-link {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
+  gap: 9px;
+  min-height: 44px;
+  padding: 9px 12px;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14px;
   border-radius: var(--radius-md);
   color: #334155;
   border: 1.5px solid transparent;
@@ -425,12 +430,12 @@ body:not(.home-page) main::before {
 .nav__drawer-divider {
   height: 1px;
   background: #e5e7eb;
-  margin: 8px 0;
+  margin: 4px 0;
 }
 
 .nav__drawer-actions {
   margin-top: auto;
-  padding-top: 16px;
+  padding-top: 12px;
   border-top: 1.5px solid #e5e7eb;
   display: flex;
   flex-direction: column;
