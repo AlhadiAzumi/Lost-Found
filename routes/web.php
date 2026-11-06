@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ClaimController;
 use App\Http\Controllers\ItemReportController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserHistoryController;
 use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,11 @@ Route::middleware('auth')->group(function () {
 
     // Riwayat Saya
     Route::get('/my/history', [UserHistoryController::class, 'index'])->name('my.history');
+
+    // Profil Pengguna
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/password', [App\Http\Controllers\Auth\PasswordController::class, 'update'])->name('password.update');
 });
 
 // --- Panel Admin & Petugas Satpam ---

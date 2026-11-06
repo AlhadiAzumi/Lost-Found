@@ -51,7 +51,9 @@
                 @endguest
                 @auth
                     <div style="display: flex; align-items: center; gap: 8px;">
-                        <span style="font-size: 13px; font-weight: 800; color: #111;">{{ auth()->user()->name }}</span>
+                        <a href="{{ route('profile.edit') }}" style="font-size: 13px; font-weight: 800; color: #111; text-decoration: underline;" title="Buka Profil">
+                            {{ auth()->user()->name }}
+                        </a>
                         <form method="POST" action="{{ route('logout') }}" style="display: inline; margin: 0;">
                             @csrf
                             <button type="submit" class="btn btn--ghost" style="padding: 6px 12px; font-size: 12px; color: #ef4444;">Keluar</button>
