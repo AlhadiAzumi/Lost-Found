@@ -357,15 +357,15 @@ body:not(.home-page) main::before {
   position: absolute;
   top: 0;
   right: 0;
-  width: min(340px, calc(100vw - 64px));
+  width: min(280px, calc(100vw - 56px));
   height: 100%;
   background: var(--white);
   border-left: 2px solid var(--ink);
   box-shadow: -4px 0 0 var(--ink);
   display: flex;
   flex-direction: column;
-  padding: 16px;
-  gap: 4px;
+  padding: 12px;
+  gap: 2px;
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -378,13 +378,13 @@ body:not(.home-page) main::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
-  padding-bottom: 12px;
+  margin-bottom: 4px;
+  padding-bottom: 8px;
   border-bottom: 1.5px solid #e5e7eb;
 }
 
 .nav__drawer-close strong {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
 }
 
@@ -392,8 +392,8 @@ body:not(.home-page) main::before {
   background: none;
   border: 1.5px solid var(--ink);
   border-radius: var(--radius-md);
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -403,12 +403,12 @@ body:not(.home-page) main::before {
 .nav__drawer-link {
   display: flex;
   align-items: center;
-  gap: 9px;
-  min-height: 44px;
-  padding: 9px 12px;
+  gap: 8px;
+  min-height: 40px;
+  padding: 7px 10px;
   font-weight: 700;
-  font-size: 14px;
-  border-radius: var(--radius-md);
+  font-size: 13px;
+  border-radius: 10px;
   color: #334155;
   border: 1.5px solid transparent;
   transition: all 0.15s;
@@ -430,16 +430,28 @@ body:not(.home-page) main::before {
 .nav__drawer-divider {
   height: 1px;
   background: #e5e7eb;
-  margin: 4px 0;
+  margin: 3px 0;
 }
 
 .nav__drawer-actions {
   margin-top: auto;
-  padding-top: 12px;
+  padding-top: 10px;
   border-top: 1.5px solid #e5e7eb;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
+}
+
+.nav__drawer-actions .btn {
+  min-height: 40px;
+  padding: 8px 14px;
+  font-size: 13px;
+}
+
+.nav__drawer-link > svg {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
 }
 
 /* ==========================================================================
