@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class Item extends Model
@@ -21,9 +22,13 @@ class Item extends Model
         'image',
         'is_sensitive',
         'security_question',
+        'security_answer',
+        'rejection_reason',
         'status',
         'approved_by',
     ];
+
+    protected $hidden = ['security_answer'];
 
     protected $casts = [
         'date_event' => 'date',
@@ -39,6 +44,27 @@ class Item extends Model
     public function getOccurredOnAttribute()
     {
         return $this->date_event;
+    }
+
+    public function setSecurityAnswerAttribute(?string $answer): void
+    {
+        $this->attributes['security_answer'] = filled($answer)
+            ? Hash::make(mb_strtolower(trim($answer)))
+            : null;
+    }
+
+    public function hasSecurityAnswer(): bool
+    {
+        return filled($this->attributes['security_answer'] ?? null);
+    }
+
+    public function matchesSecurityAnswer(string $answer): ?bool
+    {
+        if (!$this->hasSecurityAnswer()) {
+            return null;
+        }
+
+        return Hash::check(mb_strtolower(trim($answer)), $this->attributes['security_answer']);
     }
 
     public function getPhotoUrlAttribute(): string
@@ -70,5 +96,10 @@ class Item extends Model
     public function scopeApproved(Builder $query): Builder
     {
         return $query->whereIn('status', ['approved', 'disetujui']);
+    }
+
+    public function scopePubliclyVisible(Builder $query): Builder
+    {
+        return $query->whereIn('status', ['approved', 'claim_in_progress', 'returned']);
     }
 }

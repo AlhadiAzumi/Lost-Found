@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Item;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 
 class ItemReportController extends Controller
 {
@@ -37,6 +36,7 @@ class ItemReportController extends Controller
 
         if ($type === 'found') {
             $rules['security_question'] = ['required', 'string', 'max:255'];
+            $rules['security_answer'] = ['required', 'string', 'max:500'];
         }
 
         $validated = $request->validate($rules, [
@@ -46,6 +46,7 @@ class ItemReportController extends Controller
             'date_event.required'        => 'Tanggal kejadian wajib diisi.',
             'description.required'       => 'Deskripsi barang wajib diisi.',
             'security_question.required' => 'Pertanyaan keamanan wajib diisi untuk barang temuan.',
+            'security_answer.required'   => 'Jawaban keamanan wajib diisi untuk barang temuan.',
             'image.max'                  => 'Ukuran foto maksimal 2 MB.',
         ]);
 
@@ -64,11 +65,11 @@ class ItemReportController extends Controller
             'date_event'        => $validated['date_event'],
             'image'             => $imagePath,
             'security_question' => $validated['security_question'] ?? null,
-            'status'            => 'approved', // Langsung approved untuk kenyamanan testing v1
+            'security_answer'   => $validated['security_answer'] ?? null,
+            'status'            => 'pending',
         ]);
 
         return redirect()->route('items.show', $item)
-            ->with('success', 'Laporan berhasil dibuat dan ditambahkan ke katalog!');
+            ->with('success', 'Laporan berhasil dikirim dan menunggu moderasi petugas.');
     }
 }
-

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Admin Dashboard — Campus Lost & Found')
+@section('title', 'Dashboard Petugas | Lost & Found')
 
 @section('content')
 <div class="container" style="max-width: 1040px; margin: 36px auto; padding: 0 16px;">
@@ -98,4 +98,3 @@
     </div>
 </div>
 @endsection
-

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Lapor Barang Temuan — Campus Lost & Found')
+@section('title', 'Lapor Barang Temuan | Lost & Found')
 
 @section('content')
 <div class="page-wrap page-wrap--narrow">
@@ -76,13 +76,17 @@
                     <input type="text" name="security_question" value="{{ old('security_question') }}" required
                            class="input" style="background:var(--white);"
                            placeholder="Mis. Ada gantungan kunci bentuk apa yang terpasang?">
+                    <label class="label label--required" for="security_answer">Jawaban Keamanan (tidak ditampilkan ke publik)</label>
+                    <input type="text" id="security_answer" name="security_answer" value="{{ old('security_answer') }}" required
+                           class="input" style="background:var(--white);"
+                           placeholder="Masukkan jawaban yang hanya diketahui pemilik barang">
                 </div>
             </div>
 
             <div class="field">
                 <label class="label">Foto Barang <span style="color:var(--muted); font-weight:500;">(Sangat Dianjurkan)</span></label>
                 <input type="file" name="image" accept="image/*" class="input">
-                <span class="hint">Format: JPG, PNG, WebP — Maks. 2 MB</span>
+                <span class="hint">Format JPG, PNG, atau WebP. Maksimal 2 MB.</span>
             </div>
 
             <div class="form-actions" style="margin-top:4px;">

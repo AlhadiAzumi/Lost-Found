@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $item->title . ' — Detail Barang')
+@section('title', $item->title . ' | Lost & Found')
 
 @section('content')
 <div class="page-wrap page-wrap--medium">
@@ -93,6 +93,12 @@
                     <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">Deskripsi Barang</h3>
                     <div class="detail-desc">{{ $item->description ?: 'Tidak ada deskripsi rinci.' }}</div>
                 </div>
+                @if ($item->status === 'rejected' && $item->rejection_reason)
+                    <div class="alert alert--error">
+                        <x-icon name="info" :size="18" />
+                        <span><strong>Alasan penolakan:</strong> {{ $item->rejection_reason }}</span>
+                    </div>
+                @endif
 
                 {{-- Tombol Klaim --}}
                 <div class="detail-action">

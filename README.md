@@ -9,13 +9,13 @@ Proyek ini dikembangkan untuk memenuhi tugas mata kuliah **Rekayasa Perangkat Lu
 ### 👥 Modul Pengguna (Mahasiswa/Umum)
 - **Katalog Interaktif:** Pencarian barang hilang dan ditemukan dengan filter kategori, lokasi, dan tanggal.
 - **Lapor Barang Hilang (Lost):** Formulir pelaporan detail barang yang hilang beserta unggahan foto.
-- **Lapor Barang Temuan (Found):** Formulir pendataan barang temuan yang dilengkapi dengan *Pertanyaan Keamanan (Security Question)* untuk mencegah klaim palsu.
+- **Lapor Barang Temuan (Found):** Formulir pendataan barang temuan yang dilengkapi dengan pertanyaan dan jawaban keamanan. Jawaban disimpan sebagai hash dan tidak ditampilkan kepada publik.
 - **Pengajuan Klaim:** Sistem pengajuan hak milik dengan menjawab pertanyaan verifikasi dan mengunggah bukti kepemilikan.
 
 ### 🛡️ Modul Admin (Satpam/Petugas Pos)
 - **Dashboard Analitik:** Ringkasan statistik persentase barang kembali, total laporan, dan klaim tertunda.
 - **Moderasi Laporan:** Persetujuan atau penolakan laporan baru untuk mencegah spam.
-- **Verifikasi Klaim:** Validasi jawaban keamanan dari pengaju klaim.
+- **Verifikasi Klaim:** Jawaban keamanan dicocokkan tanpa menyimpan jawaban asli; petugas juga memeriksa bukti kepemilikan.
 - **Manajemen Serah Terima:** Sistem verifikasi kode unik saat serah terima barang di pos satpam.
 
 ## 🛠️ Tech Stack
@@ -37,9 +37,9 @@ Proyek ini dikembangkan untuk memenuhi tugas mata kuliah **Rekayasa Perangkat Lu
    ```bash
    git clone https://github.com/AlhadiAzumi/Lost-Found.git
    ```
-2. Masuk ke direktori proyek:
+2. Masuk ke direktori aplikasi Laravel:
    ```bash
-   cd Lost-Found
+   cd Lost-Found/lost-and-found
    ```
 3. Instal dependensi Composer:
    ```bash
@@ -49,7 +49,7 @@ Proyek ini dikembangkan untuk memenuhi tugas mata kuliah **Rekayasa Perangkat Lu
    ```bash
    cp .env.example .env
    ```
-5. Sesuaikan konfigurasi database di berkas `.env` dengan kredensial Supabase kamu:
+5. Untuk pengembangan lokal, SQLite dapat digunakan tanpa konfigurasi tambahan. Untuk Supabase, sesuaikan konfigurasi database di `.env`:
    ```env
    DB_CONNECTION=pgsql
    DB_HOST=aws-0-ap-southeast-1.pooler.supabase.com # Sesuaikan dengan host Supabase

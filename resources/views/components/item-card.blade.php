@@ -1,6 +1,6 @@
 @props(['item'])
 
-@php $isFound = $item->type === 'ditemukan'; @endphp
+@php $isFound = in_array($item->type, ['found', 'ditemukan'], true); @endphp
 
 <article class="card item">
     <a href="{{ route('items.show', $item) }}" class="item__photo" aria-label="Lihat detail {{ $item->name }}">

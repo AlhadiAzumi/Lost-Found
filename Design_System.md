@@ -170,8 +170,9 @@ Bentuk pil (`rounded-full`), border `1px` warna semantik, ukuran `text-xs font-m
 | Klaim: Menunggu / Disetujui / Ditolak / Selesai | warning-soft / success-soft / danger-soft / lime-400 | sesuai | — |
 
 ### 7.5 Navigasi
-- **Navbar publik:** logo, Katalog, Lapor (Lost/Found), Login/Daftar. Di mobile menjadi menu hamburger.
+- **Navbar publik:** ikon logo, Beranda, Katalog, Tentang, Keamanan, Bantuan, dan menu "Lainnya" untuk Panduan, Privasi, serta Ketentuan; di layar ≤1340px seluruh navigasi tersedia lewat menu hamburger.
 - **Navbar pengguna:** + Riwayat Saya, Notifikasi (ikon lonceng + penanda belum dibaca), menu profil.
+- **Footer publik:** Tentang, Panduan, Keamanan, Privasi, Bantuan & Kontak, Ketentuan Penggunaan, dan situs institusi. Jangan klaim status resmi tanpa persetujuan institusi.
 - **Sidebar admin:** Dashboard, Moderasi Laporan, Verifikasi Klaim, Serah Terima, Data Master.
 
 ### 7.6 Pencarian & Filter
@@ -320,18 +321,25 @@ Prioritas: **MVP** = wajib untuk demo happy path, **+** = tambahan setelah MVP. 
 
 | # | Halaman | Rute | Peran | SRS | Prioritas | Komponen utama | State penting |
 |---|---|---|---|---|---|---|---|
-| 1 | Beranda / Katalog | `/` | T, P, A | FR-07–10, 13 | MVP | Navbar, pencarian, tab Semua/Hilang/Ditemukan, filter, kartu barang, paginasi | Kosong, loading, hasil filter kosong |
-| 2 | Detail Barang | `/items/{id}` | T (terbatas), P, A | FR-11, 12 | MVP | Foto, badge tipe & status, info lokasi/tanggal, tombol Ajukan Klaim, banner info terbatas (tamu) | Tamu vs login, barang sudah dikembalikan, tombol klaim nonaktif bila bukan `Disetujui` |
+| 0 | Beranda / Landing | `/` | T, P, A | — | MVP | Hero, CTA, pratinjau laporan, angka ringkas, cara kerja, keamanan | Katalog kosong |
+| 1 | Katalog Barang | `/catalog` | T, P, A | FR-07–10, 13 | MVP | Navbar, pencarian, tab Semua/Hilang/Ditemukan, filter, kartu barang, paginasi | Kosong, loading, hasil filter kosong |
+| 2 | Detail Barang | `/barang/{item}` | T (terbatas), P, A | FR-11, 12 | MVP | Foto, badge tipe & status, info lokasi/tanggal, tombol Ajukan Klaim, banner info terbatas (tamu) | Tamu vs login, barang sudah dikembalikan, tombol klaim nonaktif bila bukan `Disetujui` |
 | 3 | Login | `/login` | T | FR-02, NFR-09 | MVP | Form email + sandi, tautan lupa sandi | Error kredensial, terkena rate limit |
 | 4 | Registrasi | `/register` | T | FR-01 | MVP | Form nama, email, telepon, sandi | Error validasi per field |
 | 5 | Form Lapor Lost | `/lost/create` | P | FR-14–16 | MVP | Form, upload foto + pratinjau, select kategori/lokasi, date picker | Gagal upload foto, sukses → redirect + toast |
 | 6 | Form Lapor Found | `/found/create` | P | FR-18–22 | MVP | Form, Security Question + jawaban, lokasi penitipan, upload foto | Idem, plus validasi Security Question wajib |
-| 7 | Form Klaim | `/items/{id}/claim` | P | FR-23–26 | MVP | Ringkasan barang, Security Question, input jawaban, upload bukti | Sudah punya klaim aktif, barang tidak bisa diklaim |
+| 7 | Form Klaim | `/barang/{item}/claim` | P | FR-23–26 | MVP | Ringkasan barang, Security Question, input jawaban, upload bukti | Sudah punya klaim aktif, barang tidak bisa diklaim |
 | 8 | Riwayat Saya | `/my/history` | P | FR-17, 27, 28 | MVP | Tab Laporan Saya / Klaim Saya, badge status, alasan penolakan, Kode Serah Terima | Kosong, klaim ditolak (alasan), klaim disetujui (kode) |
 | 9 | Edit / Tutup Laporan | `/my/items/{id}/edit` | P | FR-17 | + | Form edit, tombol Tutup Laporan (modal konfirmasi) | Hanya boleh bila status memungkinkan |
 | 10 | Profil & Ganti Sandi | `/profile` | P, A | FR-05 | + | Form profil, form ganti sandi | Sandi lama salah |
 | 11 | Notifikasi | `/notifications` | P, A | FR-38–40 | + | Daftar notifikasi, penanda belum dibaca, "Tandai semua dibaca" | Kosong |
 | 12 | Lupa / Reset Sandi | `/forgot-password`, `/reset-password` | T | FR-06 | + (Low) | Form email, form sandi baru | Email tidak terdaftar, token kedaluwarsa |
+| 21 | Tentang Layanan | `/tentang` | T, P, A | — | + | Tujuan, cakupan, peran petugas | Penjelasan status pengelolaan |
+| 22 | Panduan Penggunaan | `/panduan` | T, P, A | — | + | Langkah laporan, klaim, FAQ | Tautan bantuan |
+| 23 | Keamanan | `/keamanan` | T, P, A | — | + | Praktik aman, kode serah-terima, data sensitif | Peringatan lampiran bukti |
+| 24 | Privasi Data | `/privasi` | T, P, A | — | + | Jenis data, informasi publik, batas kebijakan | Masa simpan menunggu persetujuan |
+| 25 | Bantuan & Kontak | `/bantuan` | T, P, A | — | + | Email, telepon, jam layanan, pos satpam, situs PNL | Kanal layanan |
+| 26 | Ketentuan Penggunaan | `/ketentuan` | T, P, A | — | + | Aturan penggunaan dan batas pengelolaan | Persetujuan operasional kampus |
 
 ### 13.2 Halaman Admin
 
@@ -351,12 +359,12 @@ Prioritas: **MVP** = wajib untuk demo happy path, **+** = tambahan setelah MVP. 
 | 19 | Error 404 | "Halaman tidak ditemukan." + tautan ke katalog |
 | 20 | Error 500 | Pesan ramah tanpa detail teknis |
 
-**Total: 17 halaman fungsional + 3 halaman error.** MVP = 12 halaman (nomor 1–8 dan 13–16).
+**Total: 24 halaman fungsional + 3 halaman error.** MVP = 13 halaman (nomor 0–8 dan 13–16).
 
 ### 13.4 Peta Navigasi
 
 ```
-Tamu ─▶ Katalog ─▶ Detail ─▶ (login) ─▶ Form Klaim
+Tamu ─▶ Beranda ─▶ Katalog ─▶ Detail ─▶ (login) ─▶ Form Klaim
    │        └─▶ Login ◀─▶ Registrasi ─▶ Lupa Sandi
    │
 Pengguna ─▶ Katalog / Detail
@@ -378,7 +386,29 @@ Admin ─▶ Dashboard
 
 Tata letak desktop; di mobile semua kolom ditumpuk 1 kolom.
 
-### 14.1 Beranda / Katalog
+### 14.1 Beranda / Landing
+
+Landing page memakai palet langit-cyan → mint → biru, aksen lime, kartu outline/hard-shadow, dan tipografi display yang ramah seperti referensi. Isi harus tetap relevan untuk Lost & Found kampus; jangan menyalin teks atau fitur produk pada gambar. Sediakan CTA katalog sejak hero dan di bagian bawah agar alur pencarian selalu mudah dijangkau.
+
+```
+┌──────────────────────────────────────────────────────────┐
+│ [Logo] Beranda  Katalog  Lapor       [Masuk] [Daftar]   │
+├──────────────────────────┬───────────────────────────────┤
+│ Barang hilang?           │ [Pratinjau laporan terbaru]  │
+│ Harapan belum.           │ [chip aman] [status kembali] │
+│ [Jelajahi] [Laporkan]    │                               │
+├──────────────────────────┴───────────────────────────────┤
+│ Statistik ringkas · Laporan terbaru · Kategori           │
+├──────────────────────────────────────────────────────────┤
+│ Cara kerja 3 langkah                                     │
+├──────────────────────────┬───────────────────────────────┤
+│ Keamanan & verifikasi    │ Ilustrasi perisai/kode       │
+├──────────────────────────┴───────────────────────────────┤
+│ CTA penutup                                               │
+└──────────────────────────────────────────────────────────┘
+```
+
+### 14.2 Katalog Barang (`/catalog`)
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -400,7 +430,7 @@ Tata letak desktop; di mobile semua kolom ditumpuk 1 kolom.
 └───────────────┴──────────────────────────────────────────┘
 ```
 
-### 14.2 Detail Barang
+### 14.3 Detail Barang
 
 ```
 ┌──────────────────────────────────────────────────────────┐

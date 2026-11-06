@@ -7,6 +7,7 @@ use App\Models\Item;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -17,10 +18,17 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::factory()->create([
-            'name' => 'Admin Lost & Found',
-            'email' => 'admin@campus.ac.id',
-        ]);
+        $user = User::firstOrCreate(
+            ['email' => 'admin@campus.ac.id'],
+            [
+                'name' => 'Admin Lost & Found',
+                'password' => bcrypt(Str::random(40)),
+                'role' => 'admin',
+            ]
+        );
+        if ($user->role !== 'admin') {
+            $user->update(['role' => 'admin']);
+        }
 
         $categoryMap = [];
         $categories = [
@@ -33,31 +41,35 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($categories as [$name, $icon, $color]) {
-            $cat = Category::firstOrCreate(['name' => $name], compact('icon', 'color'));
+            $cat = Category::firstOrCreate(
+                ['name' => $name],
+                ['slug' => Str::slug($name), 'icon' => $icon]
+            );
             $categoryMap[$name] = $cat->id;
         }
 
         Item::create([
             'user_id' => $user->id,
             'category_id' => $categoryMap['Elektronik'] ?? 1,
-            'type' => 'hilang',
-            'name' => 'Flashdisk Sandisk 32GB Merah',
+            'type' => 'lost',
+            'title' => 'Flashdisk Sandisk 32GB Merah',
             'description' => 'Tertinggal di meja laboratorium komputer lab 3 setelah praktikum pemrograman.',
             'location' => 'Gedung F - Lab Komputer 3',
-            'occurred_on' => now()->subDays(2)->toDateString(),
-            'status' => 'disetujui',
+            'date_event' => now()->subDays(2)->toDateString(),
+            'status' => 'approved',
         ]);
 
         Item::create([
             'user_id' => $user->id,
             'category_id' => $categoryMap['Kunci'] ?? 3,
-            'type' => 'ditemukan',
-            'name' => 'Gantungan Kunci Motor Honda + Karakter Anime',
+            'type' => 'found',
+            'title' => 'Gantungan Kunci Motor Honda',
             'description' => 'Ditemukan tergantung di loker lantai 1 dekat kantin.',
             'location' => 'Kantin Utama',
-            'occurred_on' => now()->subDay()->toDateString(),
-            'status' => 'disetujui',
+            'date_event' => now()->subDay()->toDateString(),
+            'security_question' => 'Apa karakter pada gantungan kunci?',
+            'security_answer' => 'Anime',
+            'status' => 'approved',
         ]);
     }
 }
-

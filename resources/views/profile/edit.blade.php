@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Profil Pengguna — Campus Lost & Found')
+@section('title', 'Profil Pengguna | Lost & Found')
 
 @section('content')
 <div class="container" style="max-width: 800px; margin: 36px auto; padding: 0 16px;">

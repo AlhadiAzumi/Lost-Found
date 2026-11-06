@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Serah Terima Barang — Campus Lost & Found')
+@section('title', 'Serah Terima Barang | Lost & Found')
 
 @section('content')
 <div class="container" style="max-width: 900px; margin: 36px auto; padding: 0 16px;">
@@ -60,6 +60,7 @@
                 @if ($claimToHandover->status === 'approved' && !$claimToHandover->handover)
                     <form method="POST" action="{{ route('admin.handovers.process', $claimToHandover) }}">
                         @csrf
+                        <input type="hidden" name="code" value="{{ $claimToHandover->handover_code }}">
                         <div style="margin-bottom: 16px;">
                             <label for="notes" style="display: block; font-weight: 700; font-size: 14px; margin-bottom: 6px;">Catatan Penyerahan (Opsional):</label>
                             <input type="text" id="notes" name="notes" placeholder="Mis. Diserahkan setelah mencocokkan KTM fisik." class="input" style="width: 100%; box-sizing: border-box;">
@@ -113,4 +114,3 @@
     </div>
 </div>
 @endsection
-

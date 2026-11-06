@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Masuk — Campus Lost & Found')
+@section('title', 'Masuk | Lost & Found')
 
 @section('content')
 <div class="auth-wrap">

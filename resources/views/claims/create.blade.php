@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Ajukan Klaim: ' . $item->title)
+@section('title', 'Ajukan Klaim | Lost & Found')
 
 @section('content')
 <div class="page-wrap page-wrap--narrow">

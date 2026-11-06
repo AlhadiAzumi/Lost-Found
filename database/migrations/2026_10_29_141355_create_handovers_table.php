@@ -8,7 +8,7 @@ return new class extends Migration {
     public function up(): void {
         Schema::create('handovers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('claim_id')->constrained()->onDelete('cascade');
+            $table->foreignId('claim_id')->unique()->constrained()->onDelete('cascade');
             $table->foreignId('item_id')->constrained()->onDelete('cascade');
             $table->foreignId('claimed_by')->constrained('users')->onDelete('cascade');
             $table->foreignId('handed_over_by')->constrained('users')->onDelete('cascade');

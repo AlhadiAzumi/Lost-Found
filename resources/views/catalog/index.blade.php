@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Katalog Barang — Campus Lost & Found')
+@section('title', 'Katalog Barang | Lost & Found')
 
 @section('content')
     {{-- ===== HERO ===== --}}
@@ -13,7 +13,7 @@
                     </x-badge>
                     <h1 class="hero__title">Temukan barangmu,<br>kembalikan milik orang lain.</h1>
                     <p class="hero__lead">
-                        Portal resmi kampus untuk mencari dan mengembalikan barang yang tertinggal, dengan sistem verifikasi keamanan terpercaya di pos satpam.
+                        Cari barang yang hilang atau laporkan temuan di area kampus. Serah-terima dilakukan melalui petugas pos satpam.
                     </p>
                     <div class="hero__stats">
                         <div class="hero__stat">

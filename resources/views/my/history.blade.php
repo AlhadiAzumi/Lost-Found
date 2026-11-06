@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Riwayat Aktivitas — Campus Lost & Found')
+@section('title', 'Riwayat Aktivitas | Lost & Found')
 
 @section('content')
 <div class="page-wrap">
@@ -78,6 +78,11 @@
                             @else
                                 <x-badge icon="clock" color="#fef3c7">{{ ucfirst($item->status) }}</x-badge>
                             @endif
+                            @if ($item->status === 'rejected' && $item->rejection_reason)
+                                <p style="margin:8px 0 0; color:#991b1b; font-size:13px;">
+                                    <strong>Alasan penolakan:</strong> {{ $item->rejection_reason }}
+                                </p>
+                            @endif
                         </div>
                     </div>
                 @endforeach
@@ -137,7 +142,7 @@
                             </div>
                         @else
                             <div style="font-size:13px; color:#4b5563; background:#f9fafb; padding:12px 14px; border-radius:var(--radius-md); border:1px solid #e5e7eb;">
-                                <strong>Jawaban Kamu:</strong> "{{ $claim->security_answer }}"
+                                <strong>Status:</strong> Klaim telah diserahkan kepada petugas untuk diverifikasi.
                             </div>
                         @endif
                     </div>

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Lapor Barang Hilang — Campus Lost & Found')
+@section('title', 'Lapor Barang Hilang | Lost & Found')
 
 @section('content')
 <div class="page-wrap page-wrap--narrow">
@@ -67,7 +67,7 @@
             <div class="field">
                 <label class="label">Foto Barang <span style="color:var(--muted); font-weight:500;">(Opsional)</span></label>
                 <input type="file" name="image" accept="image/*" class="input">
-                <span class="hint">Format: JPG, PNG, WebP — Maks. 2 MB</span>
+                <span class="hint">Format JPG, PNG, atau WebP. Maksimal 2 MB.</span>
             </div>
 
             <div class="form-actions" style="margin-top:4px;">

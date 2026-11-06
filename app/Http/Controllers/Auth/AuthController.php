@@ -54,7 +54,7 @@ class AuthController extends Controller
             'nim_nip'      => $validated['nim_nip'] ?? null,
             'phone_number' => $validated['phone_number'] ?? null,
             'password'     => Hash::make($validated['password']),
-            'role'         => 'user',
+            'role'         => 'mahasiswa',
         ]);
 
         Auth::login($user);
@@ -73,4 +73,3 @@ class AuthController extends Controller
             ->with('success', 'Kamu telah keluar dari akun.');
     }
 }
-

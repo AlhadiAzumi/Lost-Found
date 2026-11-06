@@ -19,7 +19,9 @@ return new class extends Migration {
             $table->string('image')->nullable();
             $table->boolean('is_sensitive')->default(false);
             $table->text('security_question')->nullable();
-            $table->enum('status', ['pending', 'approved', 'rejected', 'claimed', 'expired'])->default('pending');
+            $table->string('security_answer')->nullable();
+            $table->text('rejection_reason')->nullable();
+            $table->enum('status', ['pending', 'approved', 'rejected', 'claimed', 'claim_in_progress', 'returned', 'closed', 'expired'])->default('pending');
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });

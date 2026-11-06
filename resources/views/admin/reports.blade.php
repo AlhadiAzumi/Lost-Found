@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Moderasi Laporan — Campus Lost & Found')
+@section('title', 'Moderasi Laporan | Lost & Found')
 
 @section('content')
 <div class="container" style="max-width: 1040px; margin: 36px auto; padding: 0 16px;">
@@ -14,6 +14,11 @@
     @if (session('success'))
         <div class="card panel panel--mint" style="margin-bottom: 24px; padding: 16px;">
             <strong>✓ Berhasil!</strong> {{ session('success') }}
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="card panel" style="margin-bottom: 24px; padding: 16px; background: #fee2e2;">
+            <strong>✕ Perhatian:</strong> {{ session('error') }}
         </div>
     @endif
 
@@ -50,16 +55,19 @@
                             <x-badge icon="circle-check" color="#d1fae8">{{ ucfirst($item->status) }}</x-badge>
                         </td>
                         <td style="padding: 14px 8px; text-align: right;">
-                            <form method="POST" action="{{ route('admin.reports.status', $item) }}" style="display: inline-flex; gap: 6px;">
-                                @csrf
-                                @if ($item->status !== 'approved')
+                            @if ($item->status === 'pending')
+                                <form method="POST" action="{{ route('admin.reports.status', $item) }}" style="display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">
+                                    @csrf
+                                    <input type="hidden" name="status" value="rejected">
+                                    <input type="text" name="rejection_reason" placeholder="Alasan penolakan" required class="input" style="max-width: 180px; padding: 6px 8px; font-size: 12px;">
+                                    <button type="submit" class="btn btn--ghost" style="padding: 6px 12px; font-size: 12px; color: #dc2626;">Tolak</button>
+                                </form>
+                                <form method="POST" action="{{ route('admin.reports.status', $item) }}" style="display: inline-flex;">
+                                    @csrf
                                     <input type="hidden" name="status" value="approved">
                                     <button type="submit" class="btn btn--primary" style="padding: 6px 12px; font-size: 12px;">Setujui</button>
-                                @else
-                                    <input type="hidden" name="status" value="rejected">
-                                    <button type="submit" class="btn btn--ghost" style="padding: 6px 12px; font-size: 12px; color: #dc2626;">Tolak</button>
-                                @endif
-                            </form>
+                                </form>
+                            @endif
                         </td>
                     </tr>
                 @empty
@@ -76,4 +84,3 @@
     </div>
 </div>
 @endsection
-

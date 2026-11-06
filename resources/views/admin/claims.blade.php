@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Verifikasi Klaim — Campus Lost & Found')
+@section('title', 'Verifikasi Klaim | Lost & Found')
 
 @section('content')
 <div class="container" style="max-width: 1040px; margin: 36px auto; padding: 0 16px;">
@@ -14,6 +14,11 @@
     @if (session('success'))
         <div class="card panel panel--mint" style="margin-bottom: 24px; padding: 16px;">
             <strong>✓ Berhasil!</strong> {{ session('success') }}
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="card panel" style="margin-bottom: 24px; padding: 16px; background: #fee2e2;">
+            <strong>✕ Perhatian:</strong> {{ session('error') }}
         </div>
     @endif
 
@@ -54,6 +59,13 @@
                     <div style="padding: 14px; background: #f0fdf4; border-radius: 10px; border: 1.5px solid #16a34a;">
                         <span style="font-size: 12px; font-weight: 700; color: #166534; display: block; margin-bottom: 4px;">JAWABAN DARI PENGKLAIM:</span>
                         <p style="margin: 0; font-size: 15px; font-weight: 700; color: #111;">"{{ $claim->security_answer }}"</p>
+                        @if ($claim->item->matchesSecurityAnswer($claim->security_answer) === true)
+                            <strong style="color: #166534;">Jawaban cocok</strong>
+                        @elseif ($claim->item->matchesSecurityAnswer($claim->security_answer) === false)
+                            <strong style="color: #b91c1c;">Jawaban tidak cocok</strong>
+                        @else
+                            <strong style="color: #92400e;">Jawaban belum tersimpan untuk laporan ini; tinjau bukti secara manual.</strong>
+                        @endif
                     </div>
 
                     <div style="padding: 14px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
@@ -89,4 +101,3 @@
     </div>
 </div>
 @endsection
-

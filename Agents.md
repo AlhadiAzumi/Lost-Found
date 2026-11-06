@@ -12,7 +12,9 @@ Campus Lost & Found Portal: aplikasi web untuk melapor barang hilang (**Lost**),
 - **Stack:** Laravel (PHP) · MVC · PostgreSQL di Supabase · Blade + Tailwind **[Asumsi]**
 - **Peran:** Tamu, Pengguna, Admin (satpam/petugas pos)
 - **Bahasa UI:** Indonesia
+- **Navigasi publik:** beranda pengantar di `/`, katalog barang di `/catalog`, dan informasi layanan di `/tentang`, `/panduan`, `/keamanan`, `/privasi`, `/bantuan`, `/ketentuan`
 - **Konteks:** tugas kelompok mata kuliah Rekayasa Perangkat Lunak (Kelompok 04, TI 2B), tim 8 orang
+- **Identitas institusi:** jangan menyebut aplikasi sebagai portal resmi Politeknik Negeri Lhokseumawe tanpa persetujuan kampus. Jangan mengarang kanal kontak, jam layanan, atau kebijakan pengelolaan data.
 
 ## 2. Aturan Emas (Wajib Dipatuhi)
 
@@ -28,6 +30,7 @@ Campus Lost & Found Portal: aplikasi web untuk melapor barang hilang (**Lost**),
 10. **Kode Serah Terima** unik, acak kriptografis, sekali pakai.
 11. Jangan menambah dependency besar tanpa alasan; tanyakan dulu.
 12. Jangan keluar dari lingkup v1.0 (lihat §3).
+13. Referensi UI mengarahkan bahasa visual, bukan konten/fitur produk lain; pertahankan alur dan kebutuhan Lost & Found pada PRD.
 
 ## 3. Lingkup
 

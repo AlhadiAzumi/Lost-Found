@@ -59,6 +59,7 @@ Pengunjung belum login: boleh melihat katalog terbatas, registrasi, dan login.
 ## 5. Ruang Lingkup
 
 ### 5.1 In Scope (v1.0)
+- Beranda pengantar di `/` yang mengarahkan pengguna ke katalog dan alur pelaporan
 - Katalog Lost & Found dengan pencarian, filter, tab, paginasi
 - Pelaporan Lost dan Found (dengan foto)
 - Security Question pada laporan Found
@@ -69,6 +70,10 @@ Pengunjung belum login: boleh melihat katalog terbatas, registrasi, dan login.
 
 ### 5.2 Out of Scope (v1.0)
 Aplikasi mobile native · pembayaran/transaksi · integrasi SSO/SIAKAD · pelacakan GPS/IoT.
+
+**Navigasi publik:** `/` adalah beranda pengantar; katalog dengan pencarian dan filter tersedia di `/catalog`. Halaman informasi layanan tersedia di `/tentang`, `/panduan`, `/keamanan`, `/privasi`, `/bantuan`, dan `/ketentuan`.
+
+Halaman informasi menjelaskan penggunaan layanan untuk warga Politeknik Negeri Lhokseumawe tanpa menyatakan platform sebagai portal resmi sebelum ada persetujuan institusi. Kanal kontak yang ditampilkan harus diverifikasi pengelola; kebijakan retensi dan penghapusan data perlu disahkan sebelum penggunaan produksi.
 
 ## 6. Fitur & User Stories
 

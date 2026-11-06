@@ -30,11 +30,12 @@ class CatalogController extends Controller
 
         $items = Item::query()
             ->with('category')
-            ->approved()
+            ->publiclyVisible()
             ->when($filters['q'], function ($q, $v) {
                 $q->where(function ($w) use ($v) {
-                    $w->where('title', 'ilike', "%{$v}%")
-                      ->orWhere('description', 'ilike', "%{$v}%");
+                    $search = '%' . mb_strtolower($v) . '%';
+                    $w->whereRaw('LOWER(title) LIKE ?', [$search])
+                      ->orWhereRaw('LOWER(description) LIKE ?', [$search]);
                 });
             })
             ->when($dbType, fn ($q, $v) => $q->whereIn('type', $v))
@@ -51,12 +52,20 @@ class CatalogController extends Controller
             'items'      => $items,
             'filters'    => $filters,
             'categories' => Category::orderBy('name')->get(),
-            'locations'  => Item::approved()->distinct()->orderBy('location')->pluck('location'),
+            'locations'  => Item::publiclyVisible()->distinct()->orderBy('location')->pluck('location'),
         ]);
     }
 
     public function show(Item $item)
     {
+        abort_unless(
+            in_array($item->status, ['approved', 'claim_in_progress', 'returned'], true)
+            || auth()->id() === $item->user_id
+            || auth()->user()?->role === 'admin'
+            || auth()->user()?->role === 'satpam',
+            404
+        );
+
         $item->load(['category', 'user']);
         return view('catalog.show', compact('item'));
     }

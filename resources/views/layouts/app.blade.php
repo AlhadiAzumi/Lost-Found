@@ -3,31 +3,52 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Campus Lost & Found')</title>
+    <title>@yield('title', 'Lost & Found')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/lostfound.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/lostfound.css') }}?v={{ filemtime(public_path('css/lostfound.css')) }}">
 </head>
-<body>
+<body class="{{ request()->routeIs('home') ? 'home-page' : (request()->routeIs('catalog.*') ? 'catalog-page' : '') }}">
 
     {{-- ===== NAVBAR ===== --}}
     <div class="nav-wrapper">
         <header class="nav">
             {{-- Brand --}}
-            <a href="{{ route('catalog.index') }}" class="brand" aria-label="Campus Lost & Found">
-                <img src="{{ asset('images/logo.jpg') }}" alt="Logo" class="brand__logo-img">
-                <span class="brand__name">
-                    <strong>Campus L&F</strong>
-                    <span>Lost &amp; Found Portal</span>
-                </span>
+            <a href="{{ route('home') }}" class="brand" aria-label="Lost & Found">
+                <img src="{{ asset('images/logo-mark.jpg') }}" alt="" class="brand__logo-img">
             </a>
 
             {{-- Desktop Menu --}}
             <nav class="nav__menu" aria-label="Menu utama">
+                <a href="{{ route('home') }}" class="nav__link {{ request()->routeIs('home') ? 'is-active' : '' }}">
+                    Beranda
+                </a>
                 <a href="{{ route('catalog.index') }}" class="nav__link {{ request()->routeIs('catalog.*') ? 'is-active' : '' }}">
                     Katalog
                 </a>
+                <a href="{{ route('pages.about') }}" class="nav__link {{ request()->routeIs('pages.about') ? 'is-active' : '' }}">
+                    Tentang
+                </a>
+                <a href="{{ route('pages.safety') }}" class="nav__link {{ request()->routeIs('pages.safety') ? 'is-active' : '' }}">
+                    Keamanan
+                </a>
+                <a href="{{ route('pages.contact') }}" class="nav__link {{ request()->routeIs('pages.contact') ? 'is-active' : '' }}">
+                    Bantuan
+                </a>
+                <details class="nav__dropdown {{ request()->routeIs('pages.guide', 'pages.privacy', 'pages.terms') ? 'is-active' : '' }}">
+                    <summary class="nav__link {{ request()->routeIs('pages.guide', 'pages.privacy', 'pages.terms') ? 'is-active' : '' }}">
+                        Lainnya
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </summary>
+                    <div class="nav__dropdown-menu">
+                        <a href="{{ route('pages.guide') }}" class="nav__dropdown-link {{ request()->routeIs('pages.guide') ? 'is-active' : '' }}">Panduan Penggunaan</a>
+                        <a href="{{ route('pages.privacy') }}" class="nav__dropdown-link {{ request()->routeIs('pages.privacy') ? 'is-active' : '' }}">Privasi Data</a>
+                        <a href="{{ route('pages.terms') }}" class="nav__dropdown-link {{ request()->routeIs('pages.terms') ? 'is-active' : '' }}">Ketentuan Penggunaan</a>
+                    </div>
+                </details>
                 @auth
                     <a href="{{ route('lost.create') }}" class="nav__link {{ request()->routeIs('lost.create') ? 'is-active' : '' }}">
                         Lapor Hilang
@@ -38,7 +59,7 @@
                     <a href="{{ route('my.history') }}" class="nav__link {{ request()->routeIs('my.history') ? 'is-active' : '' }}">
                         Riwayat
                     </a>
-                    @if (auth()->user()->role === 'admin')
+                    @if (in_array(auth()->user()->role, ['admin', 'satpam'], true))
                         <a href="{{ route('admin.dashboard') }}" class="nav__link nav__link--admin {{ request()->routeIs('admin.*') ? 'is-active' : '' }}">
                             Panel Admin
                         </a>
@@ -87,9 +108,38 @@
                 </button>
             </div>
 
+            <a href="{{ route('home') }}" class="nav__drawer-link {{ request()->routeIs('home') ? 'is-active' : '' }}">
+                <x-icon name="heart-handshake" :size="18" />
+                Beranda
+            </a>
             <a href="{{ route('catalog.index') }}" class="nav__drawer-link {{ request()->routeIs('catalog.*') ? 'is-active' : '' }}">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 15h18M9 3v18M15 3v18" opacity=".3"/><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
                 Katalog Barang
+            </a>
+            <div class="nav__drawer-divider"></div>
+            <a href="{{ route('pages.about') }}" class="nav__drawer-link {{ request()->routeIs('pages.about') ? 'is-active' : '' }}">
+                <x-icon name="info" :size="18" />
+                Tentang Layanan
+            </a>
+            <a href="{{ route('pages.guide') }}" class="nav__drawer-link {{ request()->routeIs('pages.guide') ? 'is-active' : '' }}">
+                <x-icon name="list-checks" :size="18" />
+                Panduan Penggunaan
+            </a>
+            <a href="{{ route('pages.safety') }}" class="nav__drawer-link {{ request()->routeIs('pages.safety') ? 'is-active' : '' }}">
+                <x-icon name="shield-check" :size="18" />
+                Keamanan
+            </a>
+            <a href="{{ route('pages.privacy') }}" class="nav__drawer-link {{ request()->routeIs('pages.privacy') ? 'is-active' : '' }}">
+                <x-icon name="lock-keyhole" :size="18" />
+                Privasi Data
+            </a>
+            <a href="{{ route('pages.contact') }}" class="nav__drawer-link {{ request()->routeIs('pages.contact') ? 'is-active' : '' }}">
+                <x-icon name="life-buoy" :size="18" />
+                Bantuan &amp; Kontak
+            </a>
+            <a href="{{ route('pages.terms') }}" class="nav__drawer-link {{ request()->routeIs('pages.terms') ? 'is-active' : '' }}">
+                <x-icon name="file-text" :size="18" />
+                Ketentuan Penggunaan
             </a>
 
             @auth
@@ -110,7 +160,7 @@
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
                     Profil Saya
                 </a>
-                @if (auth()->user()->role === 'admin')
+                @if (in_array(auth()->user()->role, ['admin', 'satpam'], true))
                     <div class="nav__drawer-divider"></div>
                     <a href="{{ route('admin.dashboard') }}" class="nav__drawer-link nav__drawer-link--admin {{ request()->routeIs('admin.*') ? 'is-active' : '' }}">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
@@ -146,12 +196,28 @@
     </main>
 
     {{-- ===== FOOTER ===== --}}
-    <footer class="footer">
-        <p>&copy; {{ date('Y') }} <strong>Campus Lost &amp; Found</strong> &middot; Universitas</p>
-        <div class="footer__links">
-            <span>Pos Satpam Kampus Utama</span>
-            <span>&middot;</span>
-            <a href="{{ route('catalog.index') }}">Katalog Barang</a>
+    <footer class="footer footer--site">
+        <div class="footer__top">
+            <div class="footer__identity">
+                <a class="footer__brand" href="{{ route('home') }}">Lost &amp; Found</a>
+                <p>Layanan informasi barang hilang dan temuan di area kampus.</p>
+            </div>
+            <nav class="footer__column" aria-label="Informasi layanan">
+                <h2>Informasi</h2>
+                <a href="{{ route('pages.about') }}">Tentang layanan</a>
+                <a href="{{ route('pages.guide') }}">Panduan penggunaan</a>
+                <a href="{{ route('pages.safety') }}">Keamanan</a>
+            </nav>
+            <nav class="footer__column" aria-label="Bantuan dan kebijakan">
+                <h2>Bantuan</h2>
+                <a href="{{ route('pages.contact') }}">Kontak &amp; bantuan</a>
+                <a href="{{ route('pages.privacy') }}">Privasi data</a>
+                <a href="{{ route('pages.terms') }}">Ketentuan penggunaan</a>
+                <a href="{{ route('catalog.index') }}">Katalog barang</a>
+            </nav>
+        </div>
+        <div class="footer__bottom">
+            <p>&copy; {{ date('Y') }} Lost &amp; Found. Layanan untuk area kampus.</p>
         </div>
     </footer>
 
