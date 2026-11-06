@@ -3,95 +3,94 @@
 @section('title', 'Dashboard Petugas | Lost & Found')
 
 @section('content')
-<div class="container" style="max-width: 1040px; margin: 36px auto; padding: 0 16px;">
-    {{-- Header Admin --}}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-        <div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+<div class="admin-dashboard">
+    <header class="admin-dashboard__header">
+        <div class="admin-dashboard__intro">
+            <div class="admin-dashboard__badge">
                 <x-badge icon="shield-check" color="#a3e636">Panel Satpam / Admin</x-badge>
             </div>
-            <h1 style="font-size: 26px; font-weight: 800; margin: 0; color: #111;">Dashboard Pengawasan Kampus</h1>
+            <h1>Dashboard Pengawasan</h1>
+            <p>Pantau laporan, klaim, dan barang yang telah dikembalikan.</p>
         </div>
-
-    </div>
+    </header>
 
     @include('admin.navigation')
 
     @if (session('success'))
-        <div class="card panel panel--mint" style="margin-bottom: 24px; padding: 16px;">
+        <div class="card panel panel--mint admin-dashboard__notice">
             <strong>✓ Berhasil!</strong> {{ session('success') }}
         </div>
     @endif
 
-    {{-- Kartu Statistik --}}
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px;">
-        <div class="card" style="padding: 20px; border: 2px solid #111; border-radius: 16px; box-shadow: 4px 4px 0 #111; background: #fff;">
-            <span style="font-size: 13px; font-weight: 700; color: #6b7280;">TOTAL LAPORAN</span>
-            <div style="font-size: 32px; font-weight: 900; margin-top: 6px; color: #111;">{{ $stats['total_items'] }}</div>
-        </div>
-        <div class="card" style="padding: 20px; border: 2px solid #111; border-radius: 16px; box-shadow: 4px 4px 0 #111; background: #fff;">
-            <span style="font-size: 13px; font-weight: 700; color: #dc2626;">BARANG HILANG</span>
-            <div style="font-size: 32px; font-weight: 900; margin-top: 6px; color: #dc2626;">{{ $stats['lost_items'] }}</div>
-        </div>
-        <div class="card" style="padding: 20px; border: 2px solid #111; border-radius: 16px; box-shadow: 4px 4px 0 #111; background: #fff;">
-            <span style="font-size: 13px; font-weight: 700; color: #16a34a;">BARANG DITEMUKAN</span>
-            <div style="font-size: 32px; font-weight: 900; margin-top: 6px; color: #16a34a;">{{ $stats['found_items'] }}</div>
-        </div>
-        <div class="card" style="padding: 20px; border: 2px solid #111; border-radius: 16px; box-shadow: 4px 4px 0 #111; background: #fef3c7;">
-            <span style="font-size: 13px; font-weight: 700; color: #d97706;">KLAIM TERTUNDA</span>
-            <div style="font-size: 32px; font-weight: 900; margin-top: 6px; color: #d97706;">{{ $stats['pending_claims'] }}</div>
-        </div>
-        <div class="card" style="padding: 20px; border: 2px solid #111; border-radius: 16px; box-shadow: 4px 4px 0 #111; background: #bef264;">
-            <span style="font-size: 13px; font-weight: 700; color: #111;">DIKEMBALIKAN</span>
-            <div style="font-size: 32px; font-weight: 900; margin-top: 6px; color: #111;">{{ $stats['returned_items'] }}</div>
-        </div>
-    </div>
+    <section class="admin-dashboard__stats" aria-label="Ringkasan laporan">
+        <article class="admin-stat">
+            <span class="admin-stat__label">Total laporan</span>
+            <strong class="admin-stat__value">{{ $stats['total_items'] }}</strong>
+        </article>
+        <article class="admin-stat admin-stat--lost">
+            <span class="admin-stat__label">Barang hilang</span>
+            <strong class="admin-stat__value">{{ $stats['lost_items'] }}</strong>
+        </article>
+        <article class="admin-stat admin-stat--found">
+            <span class="admin-stat__label">Barang ditemukan</span>
+            <strong class="admin-stat__value">{{ $stats['found_items'] }}</strong>
+        </article>
+        <article class="admin-stat admin-stat--pending">
+            <span class="admin-stat__label">Klaim tertunda</span>
+            <strong class="admin-stat__value">{{ $stats['pending_claims'] }}</strong>
+        </article>
+        <article class="admin-stat admin-stat--returned">
+            <span class="admin-stat__label">Dikembalikan</span>
+            <strong class="admin-stat__value">{{ $stats['returned_items'] }}</strong>
+        </article>
+    </section>
 
-    {{-- Dua Panel Berdampingan --}}
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 24px;">
-        {{-- Antrean Klaim Baru --}}
-        <div class="card" style="padding: 24px; border: 2px solid #111; border-radius: 18px; box-shadow: 4px 4px 0 #111; background: #fff;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="margin: 0; font-size: 18px; font-weight: 800;">Klaim Menunggu Verifikasi</h3>
-                <a href="{{ route('admin.claims') }}" style="font-size: 13px; font-weight: 700; color: #111;">Lihat Semua &rarr;</a>
+    <div class="admin-dashboard__panels">
+        <section class="admin-dashboard__panel">
+            <div class="admin-dashboard__panel-header">
+                <h2>Klaim menunggu</h2>
+                <a href="{{ route('admin.claims') }}">Lihat semua <span aria-hidden="true">→</span></a>
             </div>
 
             @if ($recentClaims->isEmpty())
-                <p style="color: #6b7280; font-size: 14px; margin: 20px 0;">Tidak ada klaim yang sedang menunggu tindakan.</p>
+                <p class="admin-dashboard__empty">Tidak ada klaim yang perlu ditinjau saat ini.</p>
             @else
-                <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div class="admin-dashboard__list">
                     @foreach ($recentClaims as $claim)
-                        <div style="padding: 12px; border: 1.5px solid #e5e7eb; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <strong style="display: block; font-size: 14px;">{{ $claim->item->title ?? 'Barang' }}</strong>
-                                <span style="font-size: 12px; color: #6b7280;">Oleh: {{ $claim->user->name ?? 'User' }}</span>
+                        <article class="admin-dashboard__list-item">
+                            <div class="admin-dashboard__item-copy">
+                                <strong>{{ $claim->item->title ?? 'Barang' }}</strong>
+                                <span>Pengklaim: {{ $claim->user->name ?? 'Pengguna' }}</span>
                             </div>
-                            <a href="{{ route('admin.claims') }}" class="btn btn--primary" style="font-size: 12px; padding: 6px 12px;">Periksa</a>
-                        </div>
+                            <a href="{{ route('admin.claims') }}" class="admin-dashboard__item-action">Periksa</a>
+                        </article>
                     @endforeach
                 </div>
             @endif
-        </div>
+        </section>
 
-        {{-- Laporan Terbaru --}}
-        <div class="card" style="padding: 24px; border: 2px solid #111; border-radius: 18px; box-shadow: 4px 4px 0 #111; background: #fff;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 style="margin: 0; font-size: 18px; font-weight: 800;">Laporan Masuk Terbaru</h3>
-                <a href="{{ route('admin.reports') }}" style="font-size: 13px; font-weight: 700; color: #111;">Lihat Semua &rarr;</a>
+        <section class="admin-dashboard__panel">
+            <div class="admin-dashboard__panel-header">
+                <h2>Laporan terbaru</h2>
+                <a href="{{ route('admin.reports') }}">Lihat semua <span aria-hidden="true">→</span></a>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                @foreach ($recentReports as $item)
-                    <div style="padding: 12px; border: 1.5px solid #e5e7eb; border-radius: 12px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <strong style="display: block; font-size: 14px;">{{ $item->title }}</strong>
-                            <span style="font-size: 12px; color: #6b7280;">Lokasi: {{ $item->location }}</span>
-                        </div>
-                        <x-badge icon="circle-check" color="#d1fae8">{{ ucfirst($item->status) }}</x-badge>
-                    </div>
-                @endforeach
-            </div>
-        </div>
+            @if ($recentReports->isEmpty())
+                <p class="admin-dashboard__empty">Belum ada laporan masuk.</p>
+            @else
+                <div class="admin-dashboard__list">
+                    @foreach ($recentReports as $item)
+                        <article class="admin-dashboard__list-item">
+                            <div class="admin-dashboard__item-copy">
+                                <strong>{{ $item->title }}</strong>
+                                <span>{{ $item->location }}</span>
+                            </div>
+                            <x-badge icon="circle-check" color="#d1fae8">{{ ucfirst($item->status) }}</x-badge>
+                        </article>
+                    @endforeach
+                </div>
+            @endif
+        </section>
     </div>
 </div>
 @endsection
