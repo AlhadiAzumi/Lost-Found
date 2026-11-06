@@ -1,51 +1,63 @@
 <?php
+
 namespace Database\Seeders;
-use Illuminate\Database\Seeder;
-use App\Models\User;
+
 use App\Models\Category;
-use Illuminate\Support\Facades\Hash;
+use App\Models\Item;
+use App\Models\User;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
 
-class DatabaseSeeder extends Seeder {
-    public function run(): void {
-        // 1. Buat Akun Admin Kampus
-        User::create([
-            'name' => 'Administrator Kampus',
+class DatabaseSeeder extends Seeder
+{
+    use WithoutModelEvents;
+
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Admin Lost & Found',
             'email' => 'admin@campus.ac.id',
-            'nim_nip' => 'ADM001',
-            'password' => Hash::make('password123'),
-            'role' => 'admin',
         ]);
 
-        // 2. Buat Akun Satpam Pos
-        User::create([
-            'name' => 'Pak Satpam Pos Utama',
-            'email' => 'satpam@campus.ac.id',
-            'nim_nip' => 'STP001',
-            'password' => Hash::make('password123'),
-            'role' => 'satpam',
-        ]);
-
-        // 3. Buat Akun Mahasiswa
-        User::create([
-            'name' => 'Mahasiswa Pelapor',
-            'email' => 'mahasiswa@student.ac.id',
-            'nim_nip' => '23456789',
-            'password' => Hash::make('password123'),
-            'role' => 'mahasiswa',
-        ]);
-
-        // 4. Masukkan Data Kategori Barang
+        $categoryMap = [];
         $categories = [
-            ['name' => 'Elektronik (Laptop, HP, Charger)', 'slug' => 'elektronik', 'icon' => 'laptop'],
-            ['name' => 'Dokumen Penting (KTM, KTP, SIM)', 'slug' => 'dokumen-penting', 'icon' => 'id-card'],
-            ['name' => 'Dompet & Tas', 'slug' => 'dompet-tas', 'icon' => 'briefcase'],
-            ['name' => 'Aksesoris & Perhiasan', 'slug' => 'aksesoris', 'icon' => 'watch'],
-            ['name' => 'Kunci Kendaraan', 'slug' => 'kunci-kendaraan', 'icon' => 'key'],
-            ['name' => 'Lainnya', 'slug' => 'lainnya', 'icon' => 'box'],
+            ['Elektronik', 'usb',       '#fce7f6'],
+            ['Dompet',     'tag',       '#dbeafe'],
+            ['Kunci',      'key-round', '#ecfccb'],
+            ['Tas',        'backpack',  '#d1fae8'],
+            ['Lainnya',    'tag',       '#fee2e2'],
+            ['Alat Tulis', 'tag',       '#ede9fe'],
         ];
 
-        foreach ($categories as $cat) {
-            Category::create($cat);
+        foreach ($categories as [$name, $icon, $color]) {
+            $cat = Category::firstOrCreate(['name' => $name], compact('icon', 'color'));
+            $categoryMap[$name] = $cat->id;
         }
+
+        Item::create([
+            'user_id' => $user->id,
+            'category_id' => $categoryMap['Elektronik'] ?? 1,
+            'type' => 'hilang',
+            'name' => 'Flashdisk Sandisk 32GB Merah',
+            'description' => 'Tertinggal di meja laboratorium komputer lab 3 setelah praktikum pemrograman.',
+            'location' => 'Gedung F - Lab Komputer 3',
+            'occurred_on' => now()->subDays(2)->toDateString(),
+            'status' => 'disetujui',
+        ]);
+
+        Item::create([
+            'user_id' => $user->id,
+            'category_id' => $categoryMap['Kunci'] ?? 3,
+            'type' => 'ditemukan',
+            'name' => 'Gantungan Kunci Motor Honda + Karakter Anime',
+            'description' => 'Ditemukan tergantung di loker lantai 1 dekat kantin.',
+            'location' => 'Kantin Utama',
+            'occurred_on' => now()->subDay()->toDateString(),
+            'status' => 'disetujui',
+        ]);
     }
 }
+
