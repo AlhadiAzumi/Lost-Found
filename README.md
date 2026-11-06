@@ -71,3 +71,23 @@ Proyek ini dikembangkan untuk memenuhi tugas mata kuliah **Rekayasa Perangkat Lu
    php artisan serve
    ```
 Aplikasi dapat diakses melalui `http://localhost:8000`.
+
+## Deploy demo ke Vercel
+
+Proyek Laravel ini dapat dijalankan di Vercel menggunakan Container Runtime beta.
+
+1. Hubungkan repositori GitHub ke Vercel dan atur **Root Directory** ke `lost-and-found`.
+2. Pada pengaturan proyek Vercel, pilih preset **Container**. Berkas `Dockerfile.vercel` dan `Caddyfile` di direktori aplikasi menyiapkan Laravel dengan FrankenPHP.
+3. Tambahkan variabel lingkungan melalui pengaturan Vercel, bukan ke repositori:
+   - `APP_KEY` — gunakan application key yang sama dengan environment aplikasi.
+   - `APP_URL` — URL deployment Vercel.
+   - `DB_CONNECTION=pgsql`
+   - `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` — kredensial database Supabase.
+   - `DB_SSLMODE=require`
+4. Deploy aplikasi, lalu jalankan migration yang pending terhadap database yang benar:
+   ```bash
+   php artisan migrate --pretend
+   php artisan migrate --force
+   ```
+
+Hobby memiliki kuota runtime bulanan dan filesystem container tidak persisten. Upload foto harus dipindahkan ke object storage sebelum layanan digunakan secara nyata; file lokal dapat hilang saat instance dihentikan atau deployment diganti.
