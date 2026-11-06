@@ -15,6 +15,18 @@
                     <p class="hero__lead">
                         Portal resmi kampus untuk mencari dan mengembalikan barang yang tertinggal dengan sistem verifikasi keamanan terpercaya di pos satpam.
                     </p>
+
+                    {{-- Mini interactive statistics highlight bar khas Brainfish --}}
+                    <div style="display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap;">
+                        <div style="background: rgba(255, 255, 255, 0.8); border: 1.5px solid var(--ink); border-radius: 12px; padding: 8px 14px; box-shadow: 2px 2px 0 var(--ink); display: flex; align-items: center; gap: 8px;">
+                            <span style="font-weight: 800; font-size: 16px; color: #166534;">{{ $items->total() }}</span>
+                            <span style="font-size: 12px; font-weight: 700; color: #475569;">Barang Terdata</span>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.8); border: 1.5px solid var(--ink); border-radius: 12px; padding: 8px 14px; box-shadow: 2px 2px 0 var(--ink); display: flex; align-items: center; gap: 8px;">
+                            <span style="font-weight: 800; font-size: 16px; color: #0284c7;">Pos Satpam</span>
+                            <span style="font-size: 12px; font-weight: 700; color: #475569;">Pusat Titik Temu</span>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="cta-card">

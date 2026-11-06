@@ -14,10 +14,10 @@
     <div class="nav-wrapper">
         <header class="nav">
             <a href="{{ route('catalog.index') }}" class="brand" aria-label="Campus Lost & Found">
-                <span class="brand__mark"><x-icon name="scan-search" :size="22" /></span>
+                <img src="{{ asset('images/logo.jpg') }}" alt="Campus Lost & Found Logo" class="brand__logo-img">
                 <span class="brand__name">
                     <strong>Campus</strong>
-                    <span>Lost &amp; Found</span>
+                    <span>Lost &amp; Found Portal</span>
                 </span>
             </a>
 

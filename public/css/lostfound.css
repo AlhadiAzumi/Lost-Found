@@ -108,6 +108,20 @@ img {
   gap: 12px;
 }
 
+.brand__logo-img {
+  width: 42px;
+  height: 42px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: transform 0.2s ease;
+}
+
+.brand:hover .brand__logo-img {
+  transform: rotate(-6deg) scale(1.08);
+}
+
 .brand__mark {
   width: 38px;
   height: 38px;
@@ -275,15 +289,46 @@ img {
 }
 
 /* ==========================================================================
-   Hero Section (Brainfish Dynamic Gradient & Clouds)
+   Hero Section (Brainfish Dynamic Gradient, Subtle Grid & Wave)
    ========================================================================== */
 
 .hero {
   position: relative;
-  padding: 56px 32px 64px;
-  background: linear-gradient(180deg, #8ee6f0 0%, #b6eff6 45%, #afead4 85%, var(--page) 100%);
+  padding: 64px 32px 76px;
+  background: linear-gradient(180deg, #8ee6f0 0%, #b6eff6 45%, #afead4 80%, #d1fae8 100%);
   border-bottom: 2px solid var(--ink);
   overflow: hidden;
+}
+
+/* Subtle Neo-Brutalist Grid Lines */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(17, 17, 17, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(17, 17, 17, 0.05) 1px, transparent 1px);
+  background-size: 36px 36px;
+  pointer-events: none;
+}
+
+/* Floating interactive glow circles */
+.hero::after {
+  content: "";
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(190, 242, 100, 0.45) 0%, rgba(175, 234, 212, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  animation: pulseGlow 8s ease-in-out infinite alternate;
+}
+
+@keyframes pulseGlow {
+  0% { transform: scale(1) translate(0, 0); opacity: 0.6; }
+  100% { transform: scale(1.15) translate(-20px, 20px); opacity: 0.9; }
 }
 
 .hero__container {
