@@ -18,11 +18,14 @@
         <div class="campus-directory__list">
             @foreach ($campuses as $campus)
                 <a class="campus-directory__card" href="{{ route('home', ['campus' => $campus->slug]) }}">
-                    <span class="campus-directory__icon" aria-hidden="true">↗</span>
-                    <span>
+                    <span class="campus-directory__mark" aria-hidden="true">
+                        <x-icon name="map-pin" :size="19" />
+                    </span>
+                    <span class="campus-directory__copy">
                         <strong>{{ $campus->name }}</strong>
                         <small>Portal barang hilang dan temuan</small>
                     </span>
+                    <span class="campus-directory__arrow" aria-hidden="true">↗</span>
                 </a>
             @endforeach
         </div>
