@@ -2603,6 +2603,15 @@ input[type="file"].input {
   .nav__menu,
   .nav__account { display: none; }
   .nav__hamburger { display: flex; }
+
+  .catalog,
+  .results,
+  .grid,
+  .item,
+  .item__body {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 /* ==========================================================================
@@ -2761,7 +2770,7 @@ input[type="file"].input {
   .tab { min-height: 36px; font-size: 12.5px; white-space: nowrap; flex-shrink: 0; }
 
   /* Grid */
-  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   .item__photo { height: 150px; }
   .item__body { padding: 14px; gap: 8px; }
   .item__title { font-size: 14px; }
