@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Support\CampusContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
@@ -273,13 +274,14 @@ class LostAndFoundWorkflowTest extends TestCase
     {
         Mail::fake();
         $this->post(route('campus-applications.store', ['campus' => null]), [
-            'name' => 'Universitas Nusantara',
+            'name' => 'universitas nusantara',
             'email' => 'admin@nusantara.ac.id',
         ])->assertRedirect(route('campuses.index'))
             ->assertSessionHas('application_submitted');
 
         $application = CampusApplication::query()->firstOrFail();
         $this->assertSame('pending', $application->status);
+        $this->assertSame('Universitas Nusantara', $application->name);
         $this->assertDatabaseMissing('campuses', ['slug' => 'universitas-nusantara']);
         $this->post(route('register', ['campus' => config('campus.default_slug')]), [
             'name' => 'Admin Nusantara',
@@ -314,6 +316,7 @@ class LostAndFoundWorkflowTest extends TestCase
         $this->assertSame('approved', $application->status);
         $this->assertDatabaseHas('campuses', [
             'id' => $application->campus_id,
+            'name' => 'Universitas Nusantara',
             'slug' => 'universitas-nusantara',
             'is_active' => 1,
         ]);
@@ -427,6 +430,27 @@ class LostAndFoundWorkflowTest extends TestCase
 
         $this->assertSame('rejected', $application->fresh()->status);
         $this->assertDatabaseMissing('campuses', ['slug' => 'kampus-ditolak']);
+    }
+
+    public function test_lowercase_campus_names_are_title_cased_for_new_and_existing_portals(): void
+    {
+        $campus = Campus::create([
+            'name' => 'universitas malikussaleh',
+            'slug' => 'universitas-malikussaleh',
+            'is_active' => true,
+        ]);
+
+        $this->assertDatabaseHas('campuses', [
+            'id' => $campus->id,
+            'name' => 'Universitas Malikussaleh',
+        ]);
+        $this->assertSame('Universitas Malikussaleh', $campus->name);
+
+        DB::table('campuses')
+            ->where('id', $campus->id)
+            ->update(['name' => 'politeknik negeri lhokseumawe']);
+
+        $this->assertSame('Politeknik Negeri Lhokseumawe', $campus->fresh()->name);
     }
 
     public function test_a_claim_requires_a_matching_security_answer_and_a_valid_handover_code(): void

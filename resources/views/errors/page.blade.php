@@ -34,7 +34,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
-    <link rel="stylesheet" href="{{ asset('css/lostfound.css') }}?v={{ filemtime(public_path('css/lostfound.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/lostfound.css') }}?v={{ hash_file('sha256', public_path('css/lostfound.css')) }}">
 </head>
 <body class="error-page error-page--{{ $code }}">
     <header class="error-page__header">

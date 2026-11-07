@@ -58,7 +58,7 @@ class CampusApplicationController extends Controller
         }
 
         CampusApplication::create([
-            'name' => trim($validated['name']),
+            'name' => Campus::formatName($validated['name']),
             'email' => $email,
             'slug' => $slug,
         ]);
