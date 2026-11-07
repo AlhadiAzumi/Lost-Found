@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCampus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Concerns\BelongsToCampus;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
@@ -63,7 +63,7 @@ class Item extends Model
 
     public function matchesSecurityAnswer(string $answer): ?bool
     {
-        if (!$this->hasSecurityAnswer()) {
+        if (! $this->hasSecurityAnswer()) {
             return null;
         }
 
@@ -72,12 +72,14 @@ class Item extends Model
 
     public function getPhotoUrlAttribute(): string
     {
-        if (!empty($this->image)) {
+        if (! empty($this->image)) {
             if (str_starts_with($this->image, 'http://') || str_starts_with($this->image, 'https://')) {
                 return $this->image;
             }
-            return Storage::url($this->image);
+
+            return Storage::disk('public')->url($this->image);
         }
+
         return asset('images/placeholder-item.png');
     }
 

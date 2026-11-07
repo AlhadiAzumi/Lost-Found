@@ -1,9 +1,9 @@
 <?php
 
+use App\Http\Middleware\SetCurrentCampus;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\SetCurrentCampus;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -12,7 +12,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->trustProxies(at: '*');
+        $trustedProxies = trim((string) env('TRUSTED_PROXIES', ''));
+
+        if ($trustedProxies !== '') {
+            $middleware->trustProxies(
+                at: $trustedProxies === '*'
+                    ? '*'
+                    : array_values(array_filter(array_map('trim', explode(',', $trustedProxies))))
+            );
+        }
+
         $middleware->prependToGroup('web', SetCurrentCampus::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

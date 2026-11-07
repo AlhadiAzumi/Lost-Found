@@ -2,12 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use App\Models\Concerns\BelongsToCampus;
+use Illuminate\Database\Eloquent\Model;
 
 class Claim extends Model
 {
     use BelongsToCampus;
+
+    private ?bool $securityAnswerMatch = null;
+
+    private bool $securityAnswerMatchResolved = false;
 
     protected $fillable = [
         'item_id',
@@ -18,6 +22,11 @@ class Claim extends Model
         'handover_code',
         'verified_by',
         'admin_note',
+    ];
+
+    protected $hidden = [
+        'security_answer',
+        'handover_code',
     ];
 
     public function item()
@@ -33,6 +42,22 @@ class Claim extends Model
     public function verifier()
     {
         return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    /**
+     * Compare the claimant's answer with the stored hash.
+     *
+     * bcrypt is intentionally expensive, so the result is memoized for the
+     * current request. Views should call this instead of matching twice.
+     */
+    public function securityAnswerMatches(): ?bool
+    {
+        if (! $this->securityAnswerMatchResolved) {
+            $this->securityAnswerMatch = $this->item?->matchesSecurityAnswer((string) $this->security_answer);
+            $this->securityAnswerMatchResolved = true;
+        }
+
+        return $this->securityAnswerMatch;
     }
 
     public function handover()

@@ -3,14 +3,11 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\ConfirmablePasswordController;
-use App\Http\Controllers\Auth\EmailVerificationNotificationController;
-use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Auth\VerifyEmailController;
-use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CampusController;
+use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ClaimController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ItemReportController;
@@ -18,9 +15,9 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\Platform\CampusManagementController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserHistoryController;
-use App\Http\Middleware\EnsureUserIsAdmin;
-use App\Http\Middleware\EnsureUserBelongsToCampus;
 use App\Http\Middleware\EnsurePlatformAdmin;
+use App\Http\Middleware\EnsureUserBelongsToCampus;
+use App\Http\Middleware\EnsureUserIsAdmin;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [CampusController::class, 'index'])->name('campuses.index');
@@ -51,13 +48,13 @@ Route::prefix('kampus/{campus:slug}')
 
         Route::middleware('guest')->group(function (): void {
             Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-            Route::post('/login', [AuthController::class, 'login']);
+            Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:10,1');
             Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
-            Route::post('/register', [AuthController::class, 'register']);
+            Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1');
             Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
-            Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');
+            Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])->middleware('throttle:6,1')->name('password.email');
             Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])->name('password.reset');
-            Route::post('/reset-password', [NewPasswordController::class, 'store'])->name('password.store');
+            Route::post('/reset-password', [NewPasswordController::class, 'store'])->middleware('throttle:6,1')->name('password.store');
         });
 
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
@@ -68,19 +65,13 @@ Route::prefix('kampus/{campus:slug}')
             Route::post('/reports', [ItemReportController::class, 'store'])->name('reports.store');
             Route::get('/barang/{item}/claim', [ClaimController::class, 'create'])->name('claims.create');
             Route::post('/barang/{item}/claim', [ClaimController::class, 'store'])->name('claims.store');
+            Route::get('/claims/{claim}/proof', [ClaimController::class, 'proof'])->name('claims.proof');
             Route::get('/my/history', [UserHistoryController::class, 'index'])->name('my.history');
             Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
             Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
             Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
             Route::put('/password', [PasswordController::class, 'update'])->name('password.update');
 
-            Route::get('/verify-email', EmailVerificationPromptController::class)->name('verification.notice');
-            Route::get('/verify-email/{id}/{hash}', VerifyEmailController::class)
-                ->middleware(['signed', 'throttle:6,1'])
-                ->name('verification.verify');
-            Route::post('/email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
-                ->middleware('throttle:6,1')
-                ->name('verification.send');
             Route::get('/confirm-password', [ConfirmablePasswordController::class, 'show'])->name('password.confirm');
             Route::post('/confirm-password', [ConfirmablePasswordController::class, 'store']);
         });

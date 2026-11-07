@@ -2,15 +2,17 @@
 
 namespace Tests\Feature;
 
-use App\Models\Category;
 use App\Models\Campus;
+use App\Models\Category;
 use App\Models\Claim;
 use App\Models\Handover;
 use App\Models\Item;
 use App\Models\User;
 use App\Support\CampusContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class LostAndFoundWorkflowTest extends TestCase
@@ -323,6 +325,106 @@ class LostAndFoundWorkflowTest extends TestCase
         ]);
         $foundItem = Item::where('type', 'found')->firstOrFail();
         $this->assertTrue($foundItem->matchesSecurityAnswer('Anime'));
+    }
+
+    public function test_login_is_rate_limited_after_repeated_failures(): void
+    {
+        $user = User::factory()->create();
+
+        for ($attempt = 0; $attempt < 5; $attempt++) {
+            $this->post(route('login'), [
+                'email' => $user->email,
+                'password' => 'wrong-password',
+            ])->assertSessionHasErrors('email');
+        }
+
+        $this->post(route('login'), [
+            'email' => $user->email,
+            'password' => 'wrong-password',
+        ])->assertSessionHasErrors('email');
+
+        $this->assertStringContainsString(
+            'Terlalu banyak percobaan masuk',
+            (string) session('errors')->first('email')
+        );
+    }
+
+    public function test_rejecting_a_claim_requires_an_admin_note(): void
+    {
+        $item = $this->createFoundItem();
+        $claimant = User::factory()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($claimant)->post(route('claims.store', ['item' => $item]), [
+            'security_answer' => 'blue sticker',
+        ])->assertRedirect(route('my.history'));
+
+        $claim = Claim::firstOrFail();
+
+        $this->actingAs($admin)->post(route('admin.claims.verify', ['claim' => $claim]), [
+            'action' => 'reject',
+        ])->assertSessionHasErrors('admin_note');
+
+        $this->assertSame('pending', $claim->fresh()->status);
+    }
+
+    public function test_claim_proof_is_only_accessible_to_the_owner_and_admins(): void
+    {
+        Storage::fake('local');
+
+        $item = $this->createFoundItem();
+        $claimant = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($claimant)->post(route('claims.store', ['item' => $item]), [
+            'security_answer' => 'blue sticker',
+            'proof_image' => UploadedFile::fake()->createWithContent(
+                'bukti.png',
+                base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl2n2kAAAAASUVORK5CYII=')
+            ),
+        ])->assertRedirect(route('my.history'));
+
+        $claim = Claim::firstOrFail();
+
+        $this->assertNotNull($claim->proof_image);
+        Storage::disk('local')->assertExists($claim->proof_image);
+
+        $this->actingAs($claimant)
+            ->get(route('claims.proof', ['claim' => $claim]))
+            ->assertOk();
+
+        $this->actingAs($otherUser)
+            ->get(route('claims.proof', ['claim' => $claim]))
+            ->assertForbidden();
+
+        $this->actingAs($admin)
+            ->get(route('claims.proof', ['claim' => $claim]))
+            ->assertOk();
+
+        $this->actingAsGuest();
+        $this->get(route('claims.proof', ['claim' => $claim]))
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_claim_serialization_hides_security_answer_and_handover_code(): void
+    {
+        $item = $this->createFoundItem();
+
+        $claim = Claim::create([
+            'item_id' => $item->id,
+            'user_id' => User::factory()->create()->id,
+            'security_answer' => 'jawaban rahasia',
+            'handover_code' => 'LFP-AAAA-BBBB',
+            'status' => 'approved',
+        ]);
+
+        $serialized = $claim->toArray();
+
+        $this->assertArrayNotHasKey('security_answer', $serialized);
+        $this->assertArrayNotHasKey('handover_code', $serialized);
+        $this->assertSame('jawaban rahasia', $claim->security_answer);
+        $this->assertSame('LFP-AAAA-BBBB', $claim->handover_code);
     }
 
     private function createCategory(): Category

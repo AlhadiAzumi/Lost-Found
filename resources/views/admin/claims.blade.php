@@ -62,19 +62,22 @@
                     <div class="admin-claim-detail admin-claim-detail--answer">
                         <span class="admin-claim-detail__label">Jawaban pengklaim</span>
                         <p>"{{ $claim->security_answer }}"</p>
-                        @if ($claim->item->matchesSecurityAnswer($claim->security_answer) === true)
-                            <strong style="color: #166534;">Jawaban cocok</strong>
-                        @elseif ($claim->item->matchesSecurityAnswer($claim->security_answer) === false)
-                            <strong style="color: #b91c1c;">Jawaban tidak cocok</strong>
-                        @else
-                            <strong style="color: #92400e;">Jawaban belum tersimpan untuk laporan ini; tinjau bukti secara manual.</strong>
+                        @if ($claim->status === 'pending')
+                            @php($answerMatch = $claim->securityAnswerMatches())
+                            @if ($answerMatch === true)
+                                <strong style="color: #166534;">Jawaban cocok</strong>
+                            @elseif ($answerMatch === false)
+                                <strong style="color: #b91c1c;">Jawaban tidak cocok</strong>
+                            @else
+                                <strong style="color: #92400e;">Jawaban belum tersimpan untuk laporan ini; tinjau bukti secara manual.</strong>
+                            @endif
                         @endif
                     </div>
 
                     <div class="admin-claim-detail">
                         <span class="admin-claim-detail__label">Bukti pendukung</span>
                         @if ($claim->proof_image)
-                            <a href="{{ Storage::url($claim->proof_image) }}" target="_blank" rel="noopener noreferrer" class="admin-claim-proof">
+                            <a href="{{ route('claims.proof', ['claim' => $claim]) }}" target="_blank" rel="noopener noreferrer" class="admin-claim-proof">
                                 Buka Berkas / Foto Bukti
                             </a>
                         @else

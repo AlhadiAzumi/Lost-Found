@@ -97,6 +97,12 @@ return [
             'prefix_indexes' => true,
             'search_path' => 'public',
             'sslmode' => env('DB_SSLMODE', 'prefer'),
+            // Supabase's transaction pooler (port 6543 / PgBouncer) does not
+            // support server-side prepared statements. Emulating them keeps
+            // the connection stable and avoids intermittent 26000 errors.
+            'options' => [
+                PDO::ATTR_EMULATE_PREPARES => env('DB_EMULATE_PREPARES', true),
+            ],
         ],
 
         'sqlsrv' => [

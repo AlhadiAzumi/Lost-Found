@@ -10,9 +10,14 @@ class LandingController extends Controller
 {
     public function index(): View
     {
+        $stats = Item::publiclyVisible()
+            ->selectRaw('count(*) as total_items')
+            ->selectRaw("sum(case when status = 'returned' then 1 else 0 end) as returned_items")
+            ->first();
+
         return view('home', [
-            'totalItems' => Item::publiclyVisible()->count(),
-            'returnedItems' => Item::where('status', 'returned')->count(),
+            'totalItems' => (int) ($stats->total_items ?? 0),
+            'returnedItems' => (int) ($stats->returned_items ?? 0),
             'recentItems' => Item::publiclyVisible()
                 ->with('category')
                 ->orderByDesc('date_event')

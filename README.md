@@ -94,10 +94,28 @@ Proyek Laravel ini menggunakan runtime PHP komunitas `vercel-php` di Vercel. Run
    - `DB_CONNECTION=pgsql`
    - `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, dan `DB_PASSWORD` — kredensial database Supabase.
    - `DB_SSLMODE=require`
-4. Deploy aplikasi. Jalankan migration yang pending dari komputer lokal yang terhubung ke database Supabase:
+   - `DB_EMULATE_PREPARES=true` — wajib untuk connection pooler Supabase.
+   - `TRUSTED_PROXIES=*` — agar URL dan cookie mengikuti domain publik Vercel.
+   - `SESSION_SECURE_COOKIE=true`
+   - `APP_DEBUG=false`
+4. Siapkan Supabase Storage untuk foto barang dan bukti klaim:
+   - Buat bucket **publik** `lost-found-public` (foto barang) dan bucket **privat** `lost-found-private` (bukti klaim) di menu Storage.
+   - Buka **Storage → S3** di dashboard Supabase, aktifkan koneksi S3 bila belum, lalu buat pasangan Access Key.
+   - Tambahkan variabel berikut di Vercel (nilai dari halaman S3 tersebut):
+     - `MEDIA_DISK_DRIVER=s3`
+     - `SUPABASE_STORAGE_KEY`, `SUPABASE_STORAGE_SECRET`
+     - `SUPABASE_STORAGE_REGION` — mis. `ap-south-1`
+     - `SUPABASE_STORAGE_ENDPOINT` — `https://<project-ref>.supabase.co/storage/v1/s3`
+     - `SUPABASE_PUBLIC_BUCKET=lost-found-public`
+     - `SUPABASE_PRIVATE_BUCKET=lost-found-private`
+     - `SUPABASE_STORAGE_PATH_STYLE=true`
+   - `SUPABASE_PUBLIC_URL` boleh dikosongkan; aplikasi menurunkannya dari endpoint dan bucket publik.
+5. Deploy aplikasi. Jalankan migration yang pending dari komputer lokal yang terhubung ke database Supabase:
    ```bash
    php artisan migrate --pretend
    php artisan migrate --force
    ```
 
-Vercel Hobby memiliki kuota penggunaan dan ditujukan untuk penggunaan personal/non-komersial. Runtime ini hanya dapat menulis ke direktori sementara; upload foto aplikasi saat ini memakai disk lokal, sehingga perlu dipindahkan ke object storage seperti Supabase Storage sebelum deployment digunakan untuk data nyata.
+`vercel.json` sudah mengarahkan function ke region `bom1` (Mumbai) agar dekat dengan database Supabase `ap-south-1`.
+
+Vercel Hobby memiliki kuota penggunaan dan ditujukan untuk penggunaan personal/non-komersial. Runtime ini hanya dapat menulis ke direktori sementara, sehingga `MEDIA_DISK_DRIVER=s3` wajib diisi di deployment; tanpa itu unggahan foto dan bukti klaim akan gagal atau hilang setelah function didaur ulang.

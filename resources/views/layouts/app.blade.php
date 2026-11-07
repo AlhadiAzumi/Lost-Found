@@ -16,8 +16,12 @@
     <div class="nav-wrapper">
         <header class="nav">
             {{-- Brand --}}
-            <a href="{{ route('home') }}" class="brand" aria-label="Lost & Found">
+            <a href="{{ route('home') }}" class="brand" aria-label="Campus Lost and Found Portal">
                 <img src="{{ asset('images/logo-mark.jpg') }}" alt="" class="brand__logo-img">
+                <span class="brand__name">
+                    <strong>Campus Lost and Found</strong>
+                    <span>Portal</span>
+                </span>
             </a>
 
             {{-- Desktop Menu --}}
@@ -25,11 +29,6 @@
                 <a href="{{ route('home') }}" class="nav__link {{ request()->routeIs('home') ? 'is-active' : '' }}">
                     Beranda
                 </a>
-                @if (isset($currentCampus))
-                    <a href="{{ route('campuses.index') }}" class="nav__link nav__link--campus" title="Ganti kampus">
-                        {{ $currentCampus->name }}
-                    </a>
-                @endif
                 <a href="{{ route('catalog.index') }}" class="nav__link {{ request()->routeIs('catalog.*') ? 'is-active' : '' }}">
                     Katalog
                 </a>
@@ -42,40 +41,34 @@
                 <a href="{{ route('pages.contact') }}" class="nav__link {{ request()->routeIs('pages.contact') ? 'is-active' : '' }}">
                     Bantuan
                 </a>
-                <details class="nav__dropdown {{ request()->routeIs('pages.guide', 'pages.privacy', 'pages.terms') ? 'is-active' : '' }}">
-                    <summary class="nav__link {{ request()->routeIs('pages.guide', 'pages.privacy', 'pages.terms') ? 'is-active' : '' }}">
+                <details class="nav__dropdown {{ request()->routeIs('campuses.*', 'pages.guide', 'pages.privacy', 'pages.terms', 'lost.create', 'found.create', 'my.history', 'admin.*', 'platform.campuses.*') ? 'is-active' : '' }}">
+                    <summary class="nav__link {{ request()->routeIs('campuses.*', 'pages.guide', 'pages.privacy', 'pages.terms', 'lost.create', 'found.create', 'my.history', 'admin.*', 'platform.campuses.*') ? 'is-active' : '' }}">
                         Lainnya
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="m6 9 6 6 6-6"/>
                         </svg>
                     </summary>
                     <div class="nav__dropdown-menu">
+                        @if (isset($currentCampus))
+                            <a href="{{ route('campuses.index') }}" class="nav__dropdown-link">Ganti Kampus ({{ $currentCampus->name }})</a>
+                        @endif
                         <a href="{{ route('pages.guide') }}" class="nav__dropdown-link {{ request()->routeIs('pages.guide') ? 'is-active' : '' }}">Panduan Penggunaan</a>
                         <a href="{{ route('pages.privacy') }}" class="nav__dropdown-link {{ request()->routeIs('pages.privacy') ? 'is-active' : '' }}">Privasi Data</a>
                         <a href="{{ route('pages.terms') }}" class="nav__dropdown-link {{ request()->routeIs('pages.terms') ? 'is-active' : '' }}">Ketentuan Penggunaan</a>
+                        @auth
+                            <span class="nav__dropdown-divider"></span>
+                            <a href="{{ route('lost.create') }}" class="nav__dropdown-link {{ request()->routeIs('lost.create') ? 'is-active' : '' }}">Lapor Barang Hilang</a>
+                            <a href="{{ route('found.create') }}" class="nav__dropdown-link {{ request()->routeIs('found.create') ? 'is-active' : '' }}">Lapor Barang Temuan</a>
+                            <a href="{{ route('my.history') }}" class="nav__dropdown-link {{ request()->routeIs('my.history') ? 'is-active' : '' }}">Riwayat Aktivitas</a>
+                            @if (in_array(auth()->user()->role, ['admin', 'satpam'], true))
+                                <a href="{{ route('admin.dashboard') }}" class="nav__dropdown-link {{ request()->routeIs('admin.*') ? 'is-active' : '' }}">Panel Admin</a>
+                            @endif
+                            @if (auth()->user()->role === 'admin' && filled(config('platform.admin_email')) && strcasecmp(auth()->user()->email, config('platform.admin_email')) === 0)
+                                <a href="{{ route('platform.campuses.index', ['campus' => null]) }}" class="nav__dropdown-link {{ request()->routeIs('platform.campuses.*') ? 'is-active' : '' }}">Kelola Kampus</a>
+                            @endif
+                        @endauth
                     </div>
                 </details>
-                @auth
-                    <a href="{{ route('lost.create') }}" class="nav__link {{ request()->routeIs('lost.create') ? 'is-active' : '' }}">
-                        Lapor Hilang
-                    </a>
-                    <a href="{{ route('found.create') }}" class="nav__link {{ request()->routeIs('found.create') ? 'is-active' : '' }}">
-                        Lapor Temuan
-                    </a>
-                    <a href="{{ route('my.history') }}" class="nav__link {{ request()->routeIs('my.history') ? 'is-active' : '' }}">
-                        Riwayat
-                    </a>
-                    @if (in_array(auth()->user()->role, ['admin', 'satpam'], true))
-                        <a href="{{ route('admin.dashboard') }}" class="nav__link nav__link--admin {{ request()->routeIs('admin.*') ? 'is-active' : '' }}">
-                            Panel Admin
-                        </a>
-                    @endif
-                    @if (auth()->user()->role === 'admin' && filled(config('platform.admin_email')) && strcasecmp(auth()->user()->email, config('platform.admin_email')) === 0)
-                        <a href="{{ route('platform.campuses.index', ['campus' => null]) }}" class="nav__link nav__link--admin {{ request()->routeIs('platform.campuses.*') ? 'is-active' : '' }}">
-                            Kelola Kampus
-                        </a>
-                    @endif
-                @endauth
             </nav>
 
             {{-- Desktop Account --}}
@@ -226,22 +219,18 @@
                 <a class="footer__brand" href="{{ route('home') }}">Lost &amp; Found</a>
                 <p>Layanan informasi barang hilang dan temuan di area kampus.</p>
             </div>
-            <nav class="footer__column" aria-label="Informasi layanan">
-                <h2>Informasi</h2>
-                <a href="{{ route('pages.about') }}">Tentang layanan</a>
-                <a href="{{ route('pages.guide') }}">Panduan penggunaan</a>
+            <nav class="footer__column" aria-label="Tautan layanan">
+                <a href="{{ route('pages.about') }}">Tentang</a>
+                <a href="{{ route('pages.guide') }}">Panduan</a>
                 <a href="{{ route('pages.safety') }}">Keamanan</a>
+                <a href="{{ route('pages.contact') }}">Bantuan</a>
+                <a href="{{ route('pages.privacy') }}">Privasi</a>
+                <a href="{{ route('pages.terms') }}">Ketentuan</a>
+                <a href="{{ route('catalog.index') }}">Katalog</a>
             </nav>
-            <nav class="footer__column" aria-label="Bantuan dan kebijakan">
-                <h2>Bantuan</h2>
-                <a href="{{ route('pages.contact') }}">Kontak &amp; bantuan</a>
-                <a href="{{ route('pages.privacy') }}">Privasi data</a>
-                <a href="{{ route('pages.terms') }}">Ketentuan penggunaan</a>
-                <a href="{{ route('catalog.index') }}">Katalog barang</a>
-            </nav>
-        </div>
-        <div class="footer__bottom">
-            <p>&copy; {{ date('Y') }} Lost &amp; Found. Layanan untuk area kampus.</p>
+            <div class="footer__bottom">
+                <p>&copy; {{ date('Y') }} Lost &amp; Found.</p>
+            </div>
         </div>
     </footer>
 

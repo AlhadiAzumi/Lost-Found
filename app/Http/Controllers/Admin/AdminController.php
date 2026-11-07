@@ -15,15 +15,15 @@ class AdminController extends Controller
     public function dashboard()
     {
         $stats = [
-            'total_items'     => Item::count(),
-            'lost_items'      => Item::whereIn('type', ['lost', 'hilang'])->count(),
-            'found_items'     => Item::whereIn('type', ['found', 'ditemukan'])->count(),
-            'pending_claims'  => Claim::whereIn('status', ['pending', 'menunggu'])->count(),
-            'returned_items'  => Item::whereIn('status', ['returned', 'selesai'])->count(),
+            'total_items' => Item::count(),
+            'lost_items' => Item::whereIn('type', ['lost', 'hilang'])->count(),
+            'found_items' => Item::whereIn('type', ['found', 'ditemukan'])->count(),
+            'pending_claims' => Claim::whereIn('status', ['pending', 'menunggu'])->count(),
+            'returned_items' => Item::whereIn('status', ['returned', 'selesai'])->count(),
         ];
 
         $recentReports = Item::with('category', 'user')->orderByDesc('id')->take(5)->get();
-        $recentClaims  = Claim::with('item', 'user')->whereIn('status', ['pending', 'menunggu'])->take(5)->get();
+        $recentClaims = Claim::with('item', 'user')->whereIn('status', ['pending', 'menunggu'])->take(5)->get();
 
         return view('admin.dashboard', compact('stats', 'recentReports', 'recentClaims'));
     }
@@ -31,6 +31,7 @@ class AdminController extends Controller
     public function reports()
     {
         $items = Item::with('category', 'user')->orderByDesc('id')->paginate(10);
+
         return view('admin.reports', compact('items'));
     }
 
@@ -59,6 +60,7 @@ class AdminController extends Controller
     public function claims()
     {
         $claims = Claim::with('item', 'user', 'verifier')->orderByDesc('id')->paginate(10);
+
         return view('admin.claims', compact('claims'));
     }
 
@@ -66,7 +68,7 @@ class AdminController extends Controller
     {
         $validated = $request->validate([
             'action' => ['required', 'in:approve,reject'],
-            'admin_note' => ['nullable', 'string', 'max:2000'],
+            'admin_note' => ['required_if:action,reject', 'nullable', 'string', 'max:2000'],
         ]);
 
         if ($claim->status !== 'pending') {
@@ -84,14 +86,14 @@ class AdminController extends Controller
                 abort_if($lockedClaim->status !== 'pending', 409, 'Klaim ini sudah diproses.');
 
                 do {
-                    $code = 'LFP-' . strtoupper(Str::random(4)) . '-' . strtoupper(Str::random(4));
+                    $code = 'LFP-'.strtoupper(Str::random(4)).'-'.strtoupper(Str::random(4));
                 } while (Claim::where('handover_code', $code)->exists());
 
                 $lockedClaim->update([
-                    'status'        => 'approved',
+                    'status' => 'approved',
                     'handover_code' => $code,
-                    'verified_by'   => auth()->id(),
-                    'admin_note'    => $validated['admin_note'] ?? null,
+                    'verified_by' => auth()->id(),
+                    'admin_note' => $validated['admin_note'] ?? null,
                 ]);
 
                 return $code;
@@ -105,12 +107,12 @@ class AdminController extends Controller
             abort_if($lockedClaim->status !== 'pending', 409, 'Klaim ini sudah diproses.');
 
             $lockedClaim->update([
-                'status'      => 'rejected',
+                'status' => 'rejected',
                 'verified_by' => auth()->id(),
-                'admin_note'  => $validated['admin_note'] ?? 'Bukti atau jawaban tidak sesuai.',
+                'admin_note' => $validated['admin_note'] ?? 'Bukti atau jawaban tidak sesuai.',
             ]);
 
-            if (!$lockedClaim->item->claims()->whereIn('status', ['pending', 'approved'])->exists()) {
+            if (! $lockedClaim->item->claims()->whereIn('status', ['pending', 'approved'])->exists()) {
                 $lockedClaim->item->update(['status' => 'approved']);
             }
         });
@@ -146,17 +148,17 @@ class AdminController extends Controller
 
             if ($lockedClaim->status !== 'approved'
                 || $lockedClaim->handover()->exists()
-                || !hash_equals((string) $lockedClaim->handover_code, trim($validated['code']))) {
+                || ! hash_equals((string) $lockedClaim->handover_code, trim($validated['code']))) {
                 return false;
             }
 
             Handover::create([
-                'claim_id'       => $lockedClaim->id,
-                'item_id'        => $lockedClaim->item_id,
-                'claimed_by'     => $lockedClaim->user_id,
+                'claim_id' => $lockedClaim->id,
+                'item_id' => $lockedClaim->item_id,
+                'claimed_by' => $lockedClaim->user_id,
                 'handed_over_by' => auth()->id(),
-                'handover_date'  => now(),
-                'notes'          => $validated['notes'] ?? null,
+                'handover_date' => now(),
+                'notes' => $validated['notes'] ?? null,
             ]);
 
             $lockedClaim->update(['status' => 'completed']);
@@ -165,7 +167,7 @@ class AdminController extends Controller
             return true;
         });
 
-        if (!$processed) {
+        if (! $processed) {
             return back()->with('error', 'Kode serah terima tidak valid atau sudah pernah diproses.');
         }
 

@@ -1,16 +1,42 @@
 <?php
 
+$mediaDriver = env('MEDIA_DISK_DRIVER', 'local');
+$supabaseEndpoint = (string) env('SUPABASE_STORAGE_ENDPOINT');
+$supabasePublicBucket = env('SUPABASE_PUBLIC_BUCKET', 'lost-found-public');
+
+$publicDiskUrl = env('SUPABASE_PUBLIC_URL') ?: env('MEDIA_PUBLIC_URL');
+
+if (! $publicDiskUrl && $mediaDriver === 's3' && $supabaseEndpoint !== '') {
+    // The S3 endpoint ends with "/storage/v1/s3"; public object URLs drop that suffix.
+    $publicDiskUrl = rtrim(preg_replace('#/storage/v1/s3/?$#', '', $supabaseEndpoint), '/')
+        .'/storage/v1/object/public/'.$supabasePublicBucket;
+}
+
+$publicDiskUrl = $publicDiskUrl ?: rtrim(env('APP_URL', 'http://localhost'), '/').'/storage';
+
+// Supabase Storage speaks S3 but does not implement AWS flexible checksums.
+// Leaving them at the SDK default ("when_supported") makes uploads fail.
+$s3Options = [
+    'key' => env('SUPABASE_STORAGE_KEY'),
+    'secret' => env('SUPABASE_STORAGE_SECRET'),
+    'region' => env('SUPABASE_STORAGE_REGION', 'ap-south-1'),
+    'endpoint' => $supabaseEndpoint ?: null,
+    'use_path_style_endpoint' => (bool) env('SUPABASE_STORAGE_PATH_STYLE', true),
+    'request_checksum_calculation' => 'when_required',
+    'response_checksum_validation' => 'when_required',
+    'http' => [
+        // Keep serverless requests from hanging if the storage API is slow.
+        'connect_timeout' => (float) env('SUPABASE_STORAGE_CONNECT_TIMEOUT', 5),
+        'timeout' => (float) env('SUPABASE_STORAGE_TIMEOUT', 30),
+    ],
+];
+
 return [
 
     /*
     |--------------------------------------------------------------------------
     | Default Filesystem Disk
     |--------------------------------------------------------------------------
-    |
-    | Here you may specify the default filesystem disk that should be used
-    | by the framework. The "local" disk, as well as a variety of cloud
-    | based disks are available to your application for file storage.
-    |
     */
 
     'default' => env('FILESYSTEM_DISK', 'local'),
@@ -20,31 +46,35 @@ return [
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |
-    | Below you may configure as many filesystem disks as necessary, and you
-    | may even configure multiple disks for the same driver. Examples for
-    | most supported storage drivers are configured here for reference.
-    |
-    | Supported drivers: "local", "ftp", "sftp", "s3"
+    | The "public" and "local" disks can run on the local filesystem (default)
+    | or on S3-compatible object storage such as Supabase Storage. Set
+    | MEDIA_DISK_DRIVER=s3 on serverless hosts where the disk is read-only.
     |
     */
 
     'disks' => [
 
         'local' => [
-            'driver' => 'local',
-            'root' => storage_path('app/private'),
+            'driver' => $mediaDriver,
+            'root' => $mediaDriver === 's3' ? '' : storage_path('app/private'),
             'serve' => true,
             'throw' => false,
             'report' => false,
+            // S3 / Supabase Storage options (ignored by the local driver).
+            ...$s3Options,
+            'bucket' => env('SUPABASE_PRIVATE_BUCKET', 'lost-found-private'),
         ],
 
         'public' => [
-            'driver' => 'local',
-            'root' => storage_path('app/public'),
-            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
-            'visibility' => 'public',
+            'driver' => $mediaDriver,
+            'root' => $mediaDriver === 's3' ? '' : storage_path('app/public'),
+            'url' => $publicDiskUrl,
+            'serve' => false,
             'throw' => false,
             'report' => false,
+            // S3 / Supabase Storage options (ignored by the local driver).
+            ...$s3Options,
+            'bucket' => $supabasePublicBucket,
         ],
 
         's3' => [
@@ -66,11 +96,6 @@ return [
     |--------------------------------------------------------------------------
     | Symbolic Links
     |--------------------------------------------------------------------------
-    |
-    | Here you may configure the symbolic links that will be created when the
-    | `storage:link` Artisan command is executed. The array keys should be
-    | the locations of the links and the values should be their targets.
-    |
     */
 
     'links' => [

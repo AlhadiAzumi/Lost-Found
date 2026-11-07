@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Support\CampusContext;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->scoped(CampusContext::class);
         URL::defaults(['campus' => config('campus.default_slug')]);
+        Password::defaults(fn () => Password::min(8));
     }
 }

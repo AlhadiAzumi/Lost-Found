@@ -2,18 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Concerns\BelongsToCampus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Concerns\BelongsToCampus;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
-    use MustVerifyEmailTrait;
     use BelongsToCampus;
+    use HasFactory, Notifiable;
 
     protected $fillable = ['name', 'email', 'nim_nip', 'phone_number', 'password', 'role', 'avatar'];
 
