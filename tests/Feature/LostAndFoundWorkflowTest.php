@@ -87,6 +87,26 @@ class LostAndFoundWorkflowTest extends TestCase
         }
     }
 
+    public function test_http_error_pages_use_the_branded_layout(): void
+    {
+        $user = User::factory()->create(['role' => 'mahasiswa']);
+
+        $this->actingAs($user)
+            ->get(route('admin.claims', ['campus' => config('campus.default_slug')]))
+            ->assertForbidden()
+            ->assertSee('Halaman ini khusus petugas kampus')
+            ->assertSee('Pilih portal kampus')
+            ->assertDontSee('Illuminate\\');
+
+        $this->get('/halaman-yang-tidak-ada')
+            ->assertNotFound()
+            ->assertSee('Sepertinya barang ini tersesat')
+            ->assertSee('Pilih portal kampus')
+            ->assertDontSee('Illuminate\\');
+
+        $this->assertStringContainsString('Kami sedang membereskan sesuatu', view('errors.500')->render());
+    }
+
     public function test_campus_portals_isolate_accounts_and_lost_and_found_records(): void
     {
         $mainCampus = Campus::query()->where('slug', config('campus.default_slug'))->firstOrFail();
