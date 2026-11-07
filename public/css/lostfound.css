@@ -117,14 +117,14 @@ img { display: block; max-width: 100%; }
   padding-top: calc(64px + var(--nav-wrapper-height));
 }
 
-body:not(.home-page) main {
+body:not(.home-page):not(.error-page) main {
   position: relative;
   isolation: isolate;
   margin-top: calc(-1 * var(--nav-wrapper-height));
   padding-top: var(--nav-wrapper-height);
 }
 
-body:not(.home-page) main::before {
+body:not(.home-page):not(.error-page) main::before {
   position: absolute;
   z-index: -1;
   top: 0;
