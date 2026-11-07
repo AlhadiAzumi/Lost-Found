@@ -38,14 +38,31 @@ class AuthController extends Controller
             ]);
         }
 
-        $credentials['campus_id'] = app(CampusContext::class)->id();
+        $campusId = app(CampusContext::class)->id();
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+        // withoutGlobalScopes() supaya akun kampus lain tetap ketemu
+        // dan bisa dibedakan dari "email tidak terdaftar"
+        $user = User::withoutGlobalScopes()
+            ->where('email', $credentials['email'])
+            ->first();
+
+        if ($user && $this->passwordMatches($credentials['password'], $user->password)) {
+            // Email + password benar, tapi akun milik portal kampus lain.
+            // campus_id NULL = akun global (admin/satpam), boleh masuk dari portal mana pun.
+            if ($user->campus_id !== null && (int) $user->campus_id !== (int) $campusId) {
+                RateLimiter::hit($throttleKey, 60);
+
+                return back()->withErrors([
+                    'email' => 'Akun ini terdaftar di portal kampus lain. Silakan masuk lewat portal kampus tempat kamu mendaftar.',
+                ])->onlyInput('email');
+            }
+
+            Auth::login($user, $request->boolean('remember'));
             RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
 
             return redirect()->intended(route('catalog.index'))
-                ->with('success', 'Selamat datang kembali, '.Auth::user()->name.'!');
+                ->with('success', 'Selamat datang kembali, '.$user->name.'!');
         }
 
         RateLimiter::hit($throttleKey, 60);
@@ -53,6 +70,23 @@ class AuthController extends Controller
         return back()->withErrors([
             'email' => 'Email atau kata sandi tidak cocok dengan data kami.',
         ])->onlyInput('email');
+    }
+
+    /**
+     * Hash::check melempar RuntimeException kalau password di database
+     * bukan bcrypt (misalnya teks biasa). Anggap saja tidak cocok, jangan error 500.
+     */
+    private function passwordMatches(string $plain, ?string $hashed): bool
+    {
+        if (! $hashed) {
+            return false;
+        }
+
+        try {
+            return Hash::check($plain, $hashed);
+        } catch (\RuntimeException $e) {
+            return false;
+        }
     }
 
     private function throttleKey(Request $request, string $email): string
@@ -107,6 +141,7 @@ class AuthController extends Controller
             'phone_number' => $validated['phone_number'] ?? null,
             'password' => Hash::make($validated['password']),
             'role' => 'mahasiswa',
+            'campus_id' => app(CampusContext::class)->id(),
         ]);
 
         Auth::login($user);
