@@ -18,6 +18,59 @@
     @if (session('error'))
         <div class="campus-management__notice campus-management__notice--error">{{ session('error') }}</div>
     @endif
+    @if ($errors->any())
+        <div class="campus-management__notice campus-management__notice--error">{{ $errors->first() }}</div>
+    @endif
+
+    <section class="campus-management__panel">
+        <h2>Pengajuan portal <span>{{ $pendingApplications->count() }}</span></h2>
+        @if ($pendingApplications->isEmpty())
+            <p class="campus-management__help">Belum ada pengajuan yang menunggu persetujuan.</p>
+        @else
+            <div class="campus-management__list">
+                @foreach ($pendingApplications as $application)
+                    <article class="campus-management__campus">
+                        <div class="campus-management__campus-info">
+                            <strong>{{ $application->name }}</strong>
+                            <span>{{ $application->email }}</span>
+                            <small>/kampus/{{ $application->slug }} · {{ $application->created_at->format('d M Y') }}</small>
+                        </div>
+                        <div class="campus-management__application-actions">
+                            <form method="POST" action="{{ route('platform.campuses.applications.approve', ['application' => $application, 'campus' => null]) }}">
+                                @csrf
+                                <button type="submit" class="btn btn--primary campus-management__toggle">Setujui</button>
+                            </form>
+                            <form method="POST" action="{{ route('platform.campuses.applications.reject', ['application' => $application, 'campus' => null]) }}">
+                                @csrf
+                                <button type="submit" class="btn btn--ghost campus-management__toggle">Tolak</button>
+                            </form>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+        @endif
+    </section>
+
+    @if ($awaitingAdminSetup->isNotEmpty())
+        <section class="campus-management__panel">
+            <h2>Menunggu pembuatan akun admin <span>{{ $awaitingAdminSetup->count() }}</span></h2>
+            <div class="campus-management__list">
+                @foreach ($awaitingAdminSetup as $application)
+                    <article class="campus-management__campus">
+                        <div class="campus-management__campus-info">
+                            <strong>{{ $application->name }}</strong>
+                            <span>{{ $application->email }}</span>
+                            <small>Tautan berlaku hingga {{ $application->invitation_expires_at?->format('d M Y') ?? '—' }}</small>
+                        </div>
+                        <form method="POST" action="{{ route('platform.campuses.applications.resend', ['application' => $application, 'campus' => null]) }}">
+                            @csrf
+                            <button type="submit" class="btn btn--ghost campus-management__toggle">Kirim Ulang Tautan</button>
+                        </form>
+                    </article>
+                @endforeach
+            </div>
+        </section>
+    @endif
 
     <section class="campus-management__panel">
         <h2>Tambah kampus</h2>

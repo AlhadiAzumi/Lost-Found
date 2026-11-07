@@ -797,6 +797,67 @@ body:not(.home-page) main::before {
   font-size: 14px;
 }
 
+.campus-application {
+  margin-top: 28px;
+  padding: 22px;
+  border: 1px solid #dbe4ec;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 5px 16px rgba(15, 23, 42, 0.045);
+}
+
+.campus-application__intro { margin-bottom: 16px; }
+
+.campus-application__eyebrow {
+  color: #16785d;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.campus-application__intro h2 {
+  margin: 5px 0;
+  color: #111827;
+  font-size: 20px;
+  font-weight: 850;
+}
+
+.campus-application__intro p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.campus-application__form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+
+.campus-application__form .field { min-width: 0; }
+.campus-application__form .input { min-height: 42px; }
+.campus-application__form > .btn { min-height: 42px; white-space: nowrap; }
+
+.campus-application__notice {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.campus-application__notice--error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
 .campus-management {
   width: min(900px, calc(100% - 32px));
   margin: 34px auto 56px;
@@ -964,6 +1025,22 @@ body:not(.home-page) main::before {
   font-size: 11px;
   overflow-wrap: anywhere;
 }
+
+.campus-management__campus-info > span,
+.campus-management__campus-info > small {
+  grid-column: 1 / -1;
+  color: #64748b;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.campus-management__application-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.campus-management__application-actions .btn { white-space: nowrap; }
 
 .campus-management__status {
   grid-column: 2;
@@ -2671,12 +2748,17 @@ input[type="file"].input {
   .campus-directory__card { min-height: 76px; gap: 11px; padding: 13px; }
   .campus-directory__mark { width: 38px; height: 38px; flex-basis: 38px; }
   .campus-directory__copy strong { font-size: 14px; }
+  .campus-application { margin-top: 22px; padding: 16px; }
+  .campus-application__intro h2 { font-size: 18px; }
+  .campus-application__form { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .campus-application__form > .btn { width: 100%; }
   .campus-management { width: calc(100% - 28px); margin: 22px auto 40px; }
   .campus-management__header h1 { font-size: 22px; }
   .campus-management__panel { padding: 15px; }
   .campus-management__form { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .campus-management__form > .btn { width: 100%; min-height: 42px; }
   .campus-management__campus { align-items: flex-start; }
+  .campus-management__application-actions { flex-direction: column; }
   .campus-management__campus-info { grid-template-columns: minmax(0, 1fr); }
   .campus-management__campus-info > a { grid-column: 1; }
   .campus-management__status { grid-column: 1; grid-row: auto; justify-self: start; margin-top: 2px; }

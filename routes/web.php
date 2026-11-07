@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\CampusController;
+use App\Http\Controllers\CampusApplicationController;
 use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\ClaimController;
 use App\Http\Controllers\DashboardController;
@@ -22,6 +23,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [CampusController::class, 'index'])->name('campuses.index');
 Route::get('/kampus', [CampusController::class, 'index'])->name('campuses.directory');
+Route::post('/campus-applications', [CampusApplicationController::class, 'store'])
+    ->middleware('throttle:5,1')
+    ->name('campus-applications.store');
+Route::get('/campus-applications/{application}/setup/{token}', [CampusApplicationController::class, 'setup'])
+    ->name('campus-applications.setup');
+Route::post('/campus-applications/{application}/setup/{token}', [CampusApplicationController::class, 'completeSetup'])
+    ->middleware('throttle:5,1')
+    ->name('campus-applications.setup.complete');
 
 Route::middleware(['auth', EnsurePlatformAdmin::class])
     ->prefix('platform/campuses')
@@ -29,6 +38,9 @@ Route::middleware(['auth', EnsurePlatformAdmin::class])
     ->group(function (): void {
         Route::get('/', [CampusManagementController::class, 'index'])->name('index');
         Route::post('/', [CampusManagementController::class, 'store'])->name('store');
+        Route::post('/applications/{application}/approve', [CampusManagementController::class, 'approve'])->name('applications.approve');
+        Route::post('/applications/{application}/reject', [CampusManagementController::class, 'reject'])->name('applications.reject');
+        Route::post('/applications/{application}/resend-invitation', [CampusManagementController::class, 'resendInvitation'])->name('applications.resend');
         Route::patch('/{managedCampus}/status', [CampusManagementController::class, 'updateStatus'])->name('status');
     });
 

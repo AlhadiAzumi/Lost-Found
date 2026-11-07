@@ -3,11 +3,18 @@
 namespace App\Http\Controllers\Platform;
 
 use App\Http\Controllers\Controller;
+use App\Mail\CampusAdminInvitation;
 use App\Models\Campus;
+use App\Models\CampusApplication;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class CampusManagementController extends Controller
@@ -16,7 +23,128 @@ class CampusManagementController extends Controller
     {
         return view('platform.campuses.index', [
             'campuses' => Campus::query()->orderBy('name')->get(),
+            'pendingApplications' => CampusApplication::query()
+                ->where('status', 'pending')
+                ->oldest()
+                ->get(),
+            'awaitingAdminSetup' => CampusApplication::query()
+                ->where('status', 'approved')
+                ->whereNull('admin_created_at')
+                ->latest()
+                ->get(),
         ]);
+    }
+
+    public function approve(CampusApplication $application): RedirectResponse
+    {
+        [$application, $token] = DB::transaction(function () use ($application): array {
+            $application = CampusApplication::query()->lockForUpdate()->findOrFail($application->id);
+
+            if ($application->status !== 'pending') {
+                throw ValidationException::withMessages([
+                    'application' => 'Pengajuan ini sudah pernah ditinjau.',
+                ]);
+            }
+
+            $emailExists = User::withoutGlobalScopes()
+                ->whereRaw('LOWER(email) = ?', [Str::lower($application->email)])
+                ->exists();
+
+            if ($emailExists) {
+                throw ValidationException::withMessages([
+                    'application' => 'Email pemohon sudah digunakan akun lain. Minta pemohon mengajukan dengan email yang belum terdaftar.',
+                ]);
+            }
+
+            $baseSlug = $application->slug;
+            $slug = $baseSlug;
+            $suffix = 2;
+
+            while (Campus::query()->where('slug', $slug)->exists()) {
+                $slug = $baseSlug.'-'.$suffix++;
+            }
+
+            $campus = Campus::create([
+                'name' => $application->name,
+                'slug' => $slug,
+                'is_active' => true,
+            ]);
+            $token = Str::random(64);
+
+            $application->update([
+                'slug' => $slug,
+                'status' => 'approved',
+                'campus_id' => $campus->id,
+                'reviewed_by' => auth()->id(),
+                'reviewed_at' => now(),
+                'invitation_token_hash' => Hash::make($token),
+                'invitation_expires_at' => now()->addDays(7),
+            ]);
+
+            return [$application->fresh(), $token];
+        });
+
+        Mail::to($application->email)->send(new CampusAdminInvitation($application, $token));
+
+        return redirect()->route('platform.campuses.index', ['campus' => null])
+            ->with('success', $this->invitationMessage('Pengajuan disetujui. Portal aktif dan tautan pembuatan akun admin telah dikirim ke email pemohon.'));
+    }
+
+    public function reject(CampusApplication $application): RedirectResponse
+    {
+        DB::transaction(function () use ($application): void {
+            $application = CampusApplication::query()->lockForUpdate()->findOrFail($application->id);
+
+            if ($application->status !== 'pending') {
+                throw ValidationException::withMessages([
+                    'application' => 'Pengajuan ini sudah pernah ditinjau.',
+                ]);
+            }
+
+            $application->update([
+                'status' => 'rejected',
+                'reviewed_by' => auth()->id(),
+                'reviewed_at' => now(),
+            ]);
+        });
+
+        return redirect()->route('platform.campuses.index', ['campus' => null])
+            ->with('success', 'Pengajuan ditolak.');
+    }
+
+    public function resendInvitation(CampusApplication $application): RedirectResponse
+    {
+        $token = Str::random(64);
+        $application = DB::transaction(function () use ($application, $token): CampusApplication {
+            $application = CampusApplication::query()->lockForUpdate()->findOrFail($application->id);
+
+            if ($application->status !== 'approved' || $application->admin_created_at !== null) {
+                throw ValidationException::withMessages([
+                    'application' => 'Undangan admin tidak tersedia untuk pengajuan ini.',
+                ]);
+            }
+
+            $application->update([
+                'invitation_token_hash' => Hash::make($token),
+                'invitation_expires_at' => now()->addDays(7),
+            ]);
+
+            return $application;
+        });
+
+        Mail::to($application->email)->send(new CampusAdminInvitation($application, $token));
+
+        return redirect()->route('platform.campuses.index', ['campus' => null])
+            ->with('success', $this->invitationMessage('Tautan pembuatan akun admin dikirim ulang.'));
+    }
+
+    private function invitationMessage(string $sentMessage): string
+    {
+        if (in_array(config('mail.default'), ['log', 'array'], true)) {
+            return $sentMessage.' Namun MAIL_MAILER saat ini hanya menyimpan email di log; atur mailer SMTP agar pemohon menerima undangan.';
+        }
+
+        return $sentMessage;
     }
 
     public function store(Request $request): RedirectResponse

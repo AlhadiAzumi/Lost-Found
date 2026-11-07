@@ -12,7 +12,8 @@ trait BelongsToCampus
     public static function bootBelongsToCampus(): void
     {
         static::addGlobalScope('campus', function (Builder $builder): void {
-            $campusId = app(CampusContext::class)->id();
+            $campusId = app(CampusContext::class)->id()
+                ?? Campus::query()->where('slug', config('campus.default_slug'))->value('id');
 
             if ($campusId !== null) {
                 $builder->where(

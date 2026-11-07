@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Mail\CampusAdminInvitation;
 use App\Models\Campus;
+use App\Models\CampusApplication;
 use App\Models\Category;
 use App\Models\Claim;
 use App\Models\Handover;
@@ -12,6 +14,7 @@ use App\Support\CampusContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -97,6 +100,9 @@ class LostAndFoundWorkflowTest extends TestCase
             'password' => Hash::make('password'),
         ]);
 
+        app(CampusContext::class)->set($mainCampus);
+        $this->createFoundItem('Kampus Utama Item');
+
         $this->post(route('login', ['campus' => $otherCampus->slug]), [
             'email' => $mainUser->email,
             'password' => 'password',
@@ -122,7 +128,20 @@ class LostAndFoundWorkflowTest extends TestCase
 
         $this->get(route('catalog.index', ['campus' => $mainCampus->slug]))
             ->assertOk()
+            ->assertSee('Kampus Utama Item')
             ->assertDontSee('Kampus Kedua Item');
+        $this->get(route('home', ['campus' => $mainCampus->slug]))
+            ->assertOk()
+            ->assertSee('Kampus Utama Item')
+            ->assertDontSee('Kampus Kedua Item');
+        $this->get(route('catalog.index', ['campus' => $otherCampus->slug]))
+            ->assertOk()
+            ->assertSee('Kampus Kedua Item')
+            ->assertDontSee('Kampus Utama Item');
+        $this->get(route('home', ['campus' => $otherCampus->slug]))
+            ->assertOk()
+            ->assertSee('Kampus Kedua Item')
+            ->assertDontSee('Kampus Utama Item');
         $this->get(route('items.show', [
             'campus' => $mainCampus->slug,
             'item' => $otherItem,
@@ -150,7 +169,15 @@ class LostAndFoundWorkflowTest extends TestCase
 
         $this->get(route('campuses.index'))
             ->assertOk()
-            ->assertSee('Politeknik Contoh');
+            ->assertSee('Pilih Kampus')
+            ->assertDontSee(route('catalog.index'))
+            ->assertSee('Politeknik Contoh')
+            ->assertSee('Ajukan portal kampus baru')
+            ->assertSee('Email pemohon');
+        $this->get(route('campuses.directory'))
+            ->assertOk()
+            ->assertSee('Pilih Kampus')
+            ->assertDontSee(route('catalog.index'));
         $this->get(route('home', ['campus' => 'politeknik-contoh']))
             ->assertOk()
             ->assertSee('Lost &amp; Found', false);
@@ -222,17 +249,164 @@ class LostAndFoundWorkflowTest extends TestCase
             ])->assertSessionHasErrors('slug');
     }
 
+    public function test_platform_admin_can_approve_campus_application_and_invite_requester_as_admin(): void
+    {
+        Mail::fake();
+        $this->post(route('campus-applications.store', ['campus' => null]), [
+            'name' => 'Universitas Nusantara',
+            'email' => 'admin@nusantara.ac.id',
+        ])->assertRedirect(route('campuses.index'))
+            ->assertSessionHas('application_submitted');
+
+        $application = CampusApplication::query()->firstOrFail();
+        $this->assertSame('pending', $application->status);
+        $this->assertDatabaseMissing('campuses', ['slug' => 'universitas-nusantara']);
+        $this->post(route('register', ['campus' => config('campus.default_slug')]), [
+            'name' => 'Admin Nusantara',
+            'email' => 'admin@nusantara.ac.id',
+            'password' => 'secure-password',
+            'password_confirmation' => 'secure-password',
+        ])->assertSessionHasErrors('email');
+        $this->post(route('campus-applications.store', ['campus' => null]), [
+            'name' => 'Universitas Nusantara',
+            'email' => 'ADMIN@NUSANTARA.AC.ID',
+        ])->assertSessionHasErrors('email');
+
+        config(['platform.admin_email' => 'platform@example.com']);
+        $platformAdmin = User::factory()->create([
+            'email' => 'platform@example.com',
+            'role' => 'admin',
+        ]);
+
+        $this->actingAs($platformAdmin)
+            ->get(route('platform.campuses.index', ['campus' => null]))
+            ->assertOk()
+            ->assertSee('Universitas Nusantara')
+            ->assertSee('Setujui');
+
+        $this->post(route('platform.campuses.applications.approve', [
+            'application' => $application,
+            'campus' => null,
+        ]))->assertRedirect(route('platform.campuses.index', ['campus' => null]))
+            ->assertSessionHas('success');
+
+        $application->refresh();
+        $this->assertSame('approved', $application->status);
+        $this->assertDatabaseHas('campuses', [
+            'id' => $application->campus_id,
+            'slug' => 'universitas-nusantara',
+            'is_active' => 1,
+        ]);
+
+        $invitation = null;
+        Mail::assertSent(CampusAdminInvitation::class, function (CampusAdminInvitation $mail) use (&$invitation, $application): bool {
+            $invitation = $mail;
+
+            return $mail->hasTo($application->email);
+        });
+
+        $this->assertStringContainsString(
+            route('campus-applications.setup', [
+                'application' => $application,
+                'token' => $invitation->token,
+                'campus' => null,
+            ]),
+            $invitation->render(),
+        );
+
+        $firstToken = $invitation->token;
+        $this->post(route('platform.campuses.applications.resend', [
+            'application' => $application,
+            'campus' => null,
+        ]))->assertRedirect(route('platform.campuses.index', ['campus' => null]))
+            ->assertSessionHas('success');
+
+        $this->get(route('campus-applications.setup', [
+            'application' => $application,
+            'token' => $firstToken,
+            'campus' => null,
+        ]))->assertRedirect(route('campuses.index'));
+
+        $resentInvitation = null;
+        Mail::assertSent(CampusAdminInvitation::class, function (CampusAdminInvitation $mail) use (&$resentInvitation, $application): bool {
+            if ($mail->application->is($application)) {
+                $resentInvitation = $mail;
+            }
+
+            return $mail->hasTo($application->email);
+        });
+        $this->assertNotSame($firstToken, $resentInvitation->token);
+
+        $setupRoute = [
+            'application' => $application,
+            'token' => $resentInvitation->token,
+            'campus' => null,
+        ];
+        $this->get(route('campus-applications.setup', $setupRoute))
+            ->assertOk()
+            ->assertSee('Buat Akun Admin');
+
+        $this->post(route('campus-applications.setup.complete', $setupRoute), [
+            'name' => 'Admin Nusantara',
+            'password' => 'secure-password',
+            'password_confirmation' => 'secure-password',
+        ])->assertRedirect(route('home', ['campus' => 'universitas-nusantara']))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('users', [
+            'email' => 'admin@nusantara.ac.id',
+            'role' => 'admin',
+            'campus_id' => $application->campus_id,
+        ]);
+        $this->assertNotNull($application->fresh()->admin_created_at);
+        $this->get(route('campus-applications.setup', $setupRoute))
+            ->assertRedirect(route('campuses.index'));
+    }
+
     public function test_campus_creation_web_access_is_restricted_to_the_configured_platform_admin(): void
     {
         config(['platform.admin_email' => 'platform@example.com']);
         $campusAdmin = User::factory()->create(['role' => 'admin']);
+        $application = CampusApplication::create([
+            'name' => 'Portal Tertutup',
+            'email' => 'requester@example.com',
+            'slug' => 'portal-tertutup',
+        ]);
 
         $this->actingAs($campusAdmin)
             ->get(route('platform.campuses.index'))
             ->assertForbidden();
+        $this->post(route('platform.campuses.applications.approve', [
+            'application' => $application,
+            'campus' => null,
+        ]))->assertForbidden();
 
         config(['platform.admin_email' => null]);
         $this->get(route('platform.campuses.index'))->assertForbidden();
+    }
+
+    public function test_platform_admin_can_reject_a_campus_application_without_creating_a_portal(): void
+    {
+        config(['platform.admin_email' => 'platform@example.com']);
+        $admin = User::factory()->create([
+            'email' => 'platform@example.com',
+            'role' => 'admin',
+        ]);
+        $application = CampusApplication::create([
+            'name' => 'Kampus Ditolak',
+            'email' => 'requester@example.com',
+            'slug' => 'kampus-ditolak',
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('platform.campuses.applications.reject', [
+                'application' => $application,
+                'campus' => null,
+            ]))->assertRedirect(route('platform.campuses.index', ['campus' => null]))
+            ->assertSessionHas('success');
+
+        $this->assertSame('rejected', $application->fresh()->status);
+        $this->assertDatabaseMissing('campuses', ['slug' => 'kampus-ditolak']);
     }
 
     public function test_a_claim_requires_a_matching_security_answer_and_a_valid_handover_code(): void
@@ -429,8 +603,9 @@ class LostAndFoundWorkflowTest extends TestCase
 
     private function createCategory(): Category
     {
-        return Category::create([
+        return Category::firstOrCreate([
             'name' => 'Lainnya',
+        ], [
             'slug' => 'lainnya',
             'icon' => 'tag',
         ]);

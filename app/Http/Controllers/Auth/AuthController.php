@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\CampusApplication;
 use App\Models\User;
 use App\Support\CampusContext;
 use Illuminate\Http\Request;
@@ -68,7 +69,25 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => [
+                'required',
+                'string',
+                'email',
+                'max:255',
+                'unique:users',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    $email = Str::lower(trim((string) $value));
+                    $reserved = CampusApplication::query()
+                        ->whereRaw('LOWER(email) = ?', [$email])
+                        ->whereIn('status', ['pending', 'approved'])
+                        ->whereNull('admin_created_at')
+                        ->exists();
+
+                    if ($reserved) {
+                        $fail('Email ini sedang digunakan untuk pengajuan portal. Gunakan tautan aktivasi yang dikirim setelah disetujui.');
+                    }
+                },
+            ],
             'nim_nip' => ['nullable', 'string', 'max:50'],
             'phone_number' => ['nullable', 'string', 'max:20'],
             'password' => ['required', 'string', Password::defaults(), 'confirmed'],

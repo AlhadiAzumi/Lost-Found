@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+@php($isCampusPicker = request()->routeIs('campuses.index', 'campuses.directory', 'campus-applications.setup'))
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,7 +18,7 @@
     <div class="nav-wrapper">
         <header class="nav">
             {{-- Brand --}}
-            <a href="{{ route('home') }}" class="brand" aria-label="Campus Lost and Found Portal">
+            <a href="{{ $isCampusPicker ? route('campuses.index') : route('home') }}" class="brand" aria-label="Campus Lost and Found Portal">
                 <img src="{{ asset('images/logo-mark.jpg') }}" alt="" class="brand__logo-img">
                 <span class="brand__name">
                     <strong>Campus Lost and Found</strong>
@@ -27,6 +28,16 @@
 
             {{-- Desktop Menu --}}
             <nav class="nav__menu" aria-label="Menu utama">
+                @if ($isCampusPicker)
+                    <a href="{{ route('campuses.index') }}" class="nav__link is-active">Pilih Kampus</a>
+                    @auth
+                        @if (auth()->user()->role === 'admin' && filled(config('platform.admin_email')) && strcasecmp(auth()->user()->email, config('platform.admin_email')) === 0)
+                            <a href="{{ route('platform.campuses.index', ['campus' => null]) }}" class="nav__link {{ request()->routeIs('platform.campuses.*') ? 'is-active' : '' }}">
+                                Kelola Kampus
+                            </a>
+                        @endif
+                    @endauth
+                @else
                 <a href="{{ route('home') }}" class="nav__link {{ request()->routeIs('home') ? 'is-active' : '' }}">
                     Beranda
                 </a>
@@ -70,9 +81,11 @@
                         @endauth
                     </div>
                 </details>
+                @endif
             </nav>
 
             {{-- Desktop Account --}}
+            @unless ($isCampusPicker)
             <div class="nav__account">
                 @guest
                     <a href="{{ route('login') }}" class="btn btn--outline btn--sm">Masuk</a>
@@ -90,6 +103,7 @@
                     </div>
                 @endauth
             </div>
+            @endunless
 
             {{-- Hamburger (mobile) --}}
             <button class="nav__hamburger" id="navHamburger" type="button" aria-label="Buka menu" aria-expanded="false" aria-controls="navDrawer">
@@ -113,6 +127,22 @@
                 </button>
             </div>
 
+            @if ($isCampusPicker)
+                <a href="{{ route('campuses.index') }}" class="nav__drawer-link is-active">
+                    <x-icon name="map-pin" :size="18" />
+                    Pilih Kampus
+                </a>
+                @auth
+                    @if (auth()->user()->role === 'admin' && filled(config('platform.admin_email')) && strcasecmp(auth()->user()->email, config('platform.admin_email')) === 0)
+                        <a href="{{ route('platform.campuses.index', ['campus' => null]) }}" class="nav__drawer-link">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/>
+                            </svg>
+                            Kelola Kampus
+                        </a>
+                    @endif
+                @endauth
+            @else
             <a href="{{ route('home') }}" class="nav__drawer-link {{ request()->routeIs('home') ? 'is-active' : '' }}">
                 <x-icon name="heart-handshake" :size="18" />
                 Beranda
@@ -208,6 +238,7 @@
                     <a href="{{ route('register') }}" class="btn btn--primary btn--block" style="justify-content: center;">Daftar Sekarang</a>
                 </div>
             @endauth
+            @endif
         </div>
     </div>
 
@@ -220,10 +251,13 @@
     <footer class="footer footer--site">
         <div class="footer__top">
             <div class="footer__identity">
-                <a class="footer__brand" href="{{ route('home') }}">Lost &amp; Found</a>
+                <a class="footer__brand" href="{{ $isCampusPicker ? route('campuses.index') : route('home') }}">Lost &amp; Found</a>
                 <p>Layanan informasi barang hilang dan temuan di area kampus.</p>
             </div>
             <nav class="footer__column" aria-label="Tautan layanan">
+                @if ($isCampusPicker)
+                    <a href="{{ route('campuses.index') }}">Pilih Kampus</a>
+                @else
                 <a href="{{ route('pages.about') }}">Tentang</a>
                 <a href="{{ route('pages.guide') }}">Panduan</a>
                 <a href="{{ route('pages.safety') }}">Keamanan</a>
@@ -231,6 +265,7 @@
                 <a href="{{ route('pages.privacy') }}">Privasi</a>
                 <a href="{{ route('pages.terms') }}">Ketentuan</a>
                 <a href="{{ route('catalog.index') }}">Katalog</a>
+                @endif
             </nav>
             <div class="footer__bottom">
                 <p>&copy; {{ date('Y') }} Lost &amp; Found.</p>
