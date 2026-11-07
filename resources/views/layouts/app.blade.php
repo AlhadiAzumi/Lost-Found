@@ -6,7 +6,8 @@
     <title>@yield('title', 'Lost & Found')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
     <link rel="stylesheet" href="{{ asset('css/lostfound.css') }}?v={{ filemtime(public_path('css/lostfound.css')) }}">
 </head>
 <body class="{{ request()->routeIs('home') ? 'home-page' : (request()->routeIs('catalog.*') ? 'catalog-page' : '') }}">
