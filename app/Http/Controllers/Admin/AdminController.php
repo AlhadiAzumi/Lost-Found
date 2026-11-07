@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Claim;
 use App\Models\Handover;
 use App\Models\Item;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -35,7 +36,7 @@ class AdminController extends Controller
         return view('admin.reports', compact('items'));
     }
 
-    public function updateReportStatus(Request $request, Item $item)
+    public function updateReportStatus(Request $request, Item $item, NotificationService $notifications)
     {
         $validated = $request->validate([
             'status' => ['required', 'in:approved,rejected'],
@@ -54,6 +55,8 @@ class AdminController extends Controller
             'approved_by' => $validated['status'] === 'approved' ? auth()->id() : null,
         ]);
 
+        $notifications->reportStatusChanged($item);
+
         return back()->with('success', 'Status laporan berhasil diperbarui.');
     }
 
@@ -64,7 +67,7 @@ class AdminController extends Controller
         return view('admin.claims', compact('claims'));
     }
 
-    public function verifyClaim(Request $request, Claim $claim)
+    public function verifyClaim(Request $request, Claim $claim, NotificationService $notifications)
     {
         $validated = $request->validate([
             'action' => ['required', 'in:approve,reject'],
@@ -99,6 +102,8 @@ class AdminController extends Controller
                 return $code;
             });
 
+            $notifications->claimDecided($claim->fresh(['item.campus', 'user']));
+
             return back()->with('success', "Klaim berhasil disetujui! Kode Serah Terima diterbitkan: $code");
         }
 
@@ -116,6 +121,8 @@ class AdminController extends Controller
                 $lockedClaim->item->update(['status' => 'approved']);
             }
         });
+
+        $notifications->claimDecided($claim->fresh(['item.campus', 'user']));
 
         return back()->with('success', 'Klaim telah ditolak.');
     }
@@ -136,7 +143,7 @@ class AdminController extends Controller
         return view('admin.handovers', compact('claimToHandover', 'searchCode', 'recentHandovers'));
     }
 
-    public function processHandover(Request $request, Claim $claim)
+    public function processHandover(Request $request, Claim $claim, NotificationService $notifications)
     {
         $validated = $request->validate([
             'code' => ['required', 'string', 'max:20'],
@@ -170,6 +177,8 @@ class AdminController extends Controller
         if (! $processed) {
             return back()->with('error', 'Kode serah terima tidak valid atau sudah pernah diproses.');
         }
+
+        $notifications->handoverCompleted($claim->fresh(['item.campus', 'user']));
 
         return redirect()->route('admin.handovers')
             ->with('success', 'Serah terima berhasil dicatat! Status barang kini resmi: Dikembalikan.');

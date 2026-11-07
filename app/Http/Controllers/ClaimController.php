@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Claim;
 use App\Models\Item;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -34,7 +35,7 @@ class ClaimController extends Controller
         return view('claims.create', compact('item'));
     }
 
-    public function store(Request $request, Item $item)
+    public function store(Request $request, Item $item, NotificationService $notifications)
     {
         abort_unless(
             in_array($item->type, ['found', 'ditemukan'], true)
@@ -48,7 +49,7 @@ class ClaimController extends Controller
             'proof_image' => ['nullable', 'file', 'mimes:jpeg,png,jpg,webp,pdf', 'max:2048'],
         ]);
 
-        DB::transaction(function () use ($request, $item, $validated): void {
+        DB::transaction(function () use ($request, $item, $validated, $notifications): void {
             $lockedItem = Item::query()->lockForUpdate()->findOrFail($item->id);
 
             if (! in_array($lockedItem->type, ['found', 'ditemukan'], true)
@@ -66,7 +67,7 @@ class ClaimController extends Controller
                 ? $request->file('proof_image')->store('claims', 'local')
                 : null;
 
-            Claim::create([
+            $claim = Claim::create([
                 'item_id' => $lockedItem->id,
                 'user_id' => auth()->id(),
                 'security_answer' => $validated['security_answer'],
@@ -75,6 +76,8 @@ class ClaimController extends Controller
             ]);
 
             $lockedItem->update(['status' => 'claim_in_progress']);
+
+            $notifications->claimSubmitted($claim);
         });
 
         return redirect()->route('my.history')

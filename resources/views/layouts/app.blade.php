@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 @php($isCampusPicker = request()->routeIs('campuses.index', 'campuses.directory', 'campus-applications.setup'))
+@php($unreadNotificationCount = auth()->check() ? auth()->user()->unreadNotifications()->count() : 0)
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -92,6 +93,12 @@
                     <a href="{{ route('register') }}" class="btn btn--primary btn--sm">Daftar</a>
                 @endguest
                 @auth
+                    <a href="{{ route('notifications.index') }}" class="nav__notif {{ request()->routeIs('notifications.*') ? 'is-active' : '' }}" title="Notifikasi" aria-label="Notifikasi ({{ $unreadNotificationCount }} belum dibaca)">
+                        <x-icon name="bell" :size="18" />
+                        @if ($unreadNotificationCount > 0)
+                            <span class="nav__notif-badge">{{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}</span>
+                        @endif
+                    </a>
                     <div class="nav__user">
                         <a href="{{ route('profile.edit') }}" class="nav__user-name" title="Profil saya">
                             {{ auth()->user()->name }}
@@ -206,6 +213,13 @@
                 <a href="{{ route('my.history') }}" class="nav__drawer-link {{ request()->routeIs('my.history') ? 'is-active' : '' }}">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
                     Riwayat Aktivitas
+                </a>
+                <a href="{{ route('notifications.index') }}" class="nav__drawer-link {{ request()->routeIs('notifications.*') ? 'is-active' : '' }}">
+                    <x-icon name="bell" :size="18" />
+                    Notifikasi
+                    @if ($unreadNotificationCount > 0)
+                        <span class="nav__drawer-badge">{{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}</span>
+                    @endif
                 </a>
                 <a href="{{ route('profile.edit') }}" class="nav__drawer-link {{ request()->routeIs('profile.*') ? 'is-active' : '' }}">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
