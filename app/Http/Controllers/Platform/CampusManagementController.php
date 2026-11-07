@@ -16,6 +16,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class CampusManagementController extends Controller
 {
@@ -84,10 +85,15 @@ class CampusManagementController extends Controller
             return [$application->fresh(), $token];
         });
 
-        Mail::to($application->email)->send(new CampusAdminInvitation($application, $token));
+        $emailSent = $this->sendInvitation($application, $token);
 
-        return redirect()->route('platform.campuses.index', ['campus' => null])
-            ->with('success', $this->invitationMessage('Pengajuan disetujui. Portal aktif dan tautan pembuatan akun admin telah dikirim ke email pemohon.'));
+        $redirect = redirect()->route('platform.campuses.index', ['campus' => null]);
+
+        if (! $emailSent) {
+            return $redirect->with('error', 'Pengajuan disetujui dan portal sudah aktif, tetapi email undangan gagal dikirim. Coba kirim ulang tautan setelah layanan email tersedia.');
+        }
+
+        return $redirect->with('success', $this->invitationMessage('Pengajuan disetujui. Portal aktif dan tautan pembuatan akun admin telah dikirim ke email pemohon.'));
     }
 
     public function reject(CampusApplication $application): RedirectResponse
@@ -132,10 +138,28 @@ class CampusManagementController extends Controller
             return $application;
         });
 
-        Mail::to($application->email)->send(new CampusAdminInvitation($application, $token));
+        $emailSent = $this->sendInvitation($application, $token);
 
-        return redirect()->route('platform.campuses.index', ['campus' => null])
-            ->with('success', $this->invitationMessage('Tautan pembuatan akun admin dikirim ulang.'));
+        $redirect = redirect()->route('platform.campuses.index', ['campus' => null]);
+
+        if (! $emailSent) {
+            return $redirect->with('error', 'Email undangan gagal dikirim. Tautan baru tersimpan; coba kirim ulang setelah layanan email tersedia.');
+        }
+
+        return $redirect->with('success', $this->invitationMessage('Tautan pembuatan akun admin dikirim ulang.'));
+    }
+
+    private function sendInvitation(CampusApplication $application, string $token): bool
+    {
+        try {
+            Mail::to($application->email)->send(new CampusAdminInvitation($application, $token));
+        } catch (TransportExceptionInterface $exception) {
+            report($exception);
+
+            return false;
+        }
+
+        return true;
     }
 
     private function invitationMessage(string $sentMessage): string

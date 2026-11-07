@@ -13,10 +13,12 @@ use App\Models\User;
 use App\Support\CampusContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Mail\PendingMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Mailer\Exception\TransportException;
 use Tests\TestCase;
 
 class LostAndFoundWorkflowTest extends TestCase
@@ -406,6 +408,52 @@ class LostAndFoundWorkflowTest extends TestCase
 
         config(['platform.admin_email' => null]);
         $this->get(route('platform.campuses.index'))->assertForbidden();
+    }
+
+    public function test_resending_campus_invitation_handles_mail_transport_failure(): void
+    {
+        config(['platform.admin_email' => 'platform@example.com']);
+        $admin = User::factory()->create([
+            'email' => 'platform@example.com',
+            'role' => 'admin',
+        ]);
+        $campus = Campus::create([
+            'name' => 'Kampus Undangan',
+            'slug' => 'kampus-undangan',
+            'is_active' => true,
+        ]);
+        $application = CampusApplication::create([
+            'name' => 'Kampus Undangan',
+            'email' => 'requester@example.com',
+            'slug' => 'kampus-undangan',
+            'status' => 'approved',
+            'campus_id' => $campus->id,
+            'invitation_token_hash' => Hash::make('old-token'),
+            'invitation_expires_at' => now()->addDays(7),
+        ]);
+        $pendingMail = \Mockery::mock(PendingMail::class);
+        $pendingMail->shouldReceive('send')
+            ->once()
+            ->with(\Mockery::type(CampusAdminInvitation::class))
+            ->andThrow(new TransportException('SMTP unavailable'));
+        Mail::shouldReceive('to')
+            ->once()
+            ->with($application->email)
+            ->andReturn($pendingMail);
+
+        $this->actingAs($admin)
+            ->post(route('platform.campuses.applications.resend', [
+                'application' => $application,
+                'campus' => null,
+            ]))
+            ->assertRedirect(route('platform.campuses.index', ['campus' => null]))
+            ->assertSessionHas('error', 'Email undangan gagal dikirim. Tautan baru tersimpan; coba kirim ulang setelah layanan email tersedia.');
+
+        $this->assertNotSame(
+            $application->invitation_token_hash,
+            $application->fresh()->invitation_token_hash,
+        );
+        $this->assertNull($application->fresh()->admin_created_at);
     }
 
     public function test_platform_admin_can_reject_a_campus_application_without_creating_a_portal(): void
