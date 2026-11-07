@@ -15,7 +15,7 @@ class LandingPageTest extends TestCase
     public function test_home_is_a_landing_page_and_catalog_remains_available_separately(): void
     {
         $category = Category::create([
-            'name' => 'Elektronik',
+            'name' => 'Elektronik (Laptop, HP, Charger)',
             'slug' => 'elektronik',
             'icon' => 'usb',
         ]);
@@ -47,6 +47,8 @@ class LandingPageTest extends TestCase
             ->assertSee('class="catalog-page"', false)
             ->assertSee('area kampus')
             ->assertDontSee('Portal resmi kampus')
+            ->assertSee('item__category-label')
+            ->assertSee('Elektronik (Laptop, HP, Charger)')
             ->assertSee('Filter Barang');
     }
 }

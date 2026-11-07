@@ -1963,6 +1963,7 @@ input[type="file"].input {
 
 /* Item Card */
 .item {
+  min-width: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -2006,13 +2007,21 @@ input[type="file"].input {
   gap: 10px;
   padding: 18px;
   flex: 1;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .item__category {
   align-self: flex-start;
+  box-sizing: border-box;
   max-width: 100%;
   min-width: 0;
   white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.item__category-label {
+  min-width: 0;
   overflow-wrap: anywhere;
 }
 
@@ -2021,15 +2030,27 @@ input[type="file"].input {
   font-weight: 800;
   line-height: 1.35;
   color: var(--ink);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .item__meta {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   font-size: 12px;
   color: var(--muted);
   font-weight: 600;
+  min-width: 0;
+}
+
+.item__meta > .icon {
+  flex: 0 0 auto;
+}
+
+.item__meta > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .item__footer {
@@ -2740,7 +2761,7 @@ input[type="file"].input {
   .tab { min-height: 36px; font-size: 12.5px; white-space: nowrap; flex-shrink: 0; }
 
   /* Grid */
-  .grid { grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .item__photo { height: 150px; }
   .item__body { padding: 14px; gap: 8px; }
   .item__title { font-size: 14px; }
