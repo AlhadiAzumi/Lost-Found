@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'Lost & Found')</title>
+    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo-mark.jpg') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -125,6 +126,9 @@
             @auth
                 @if (auth()->user()->role === 'admin' && filled(config('platform.admin_email')) && strcasecmp(auth()->user()->email, config('platform.admin_email')) === 0)
                     <a href="{{ route('platform.campuses.index', ['campus' => null]) }}" class="nav__drawer-link">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/>
+                        </svg>
                         Kelola Kampus
                     </a>
                 @endif

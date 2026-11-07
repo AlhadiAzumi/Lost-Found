@@ -14,7 +14,7 @@
     </a>
 
     <div class="item__body">
-        <x-badge :icon="$item->category->icon" :color="$item->category->color">
+        <x-badge class="item__category" :icon="$item->category->icon" :color="$item->category->color">
             {{ $item->category->name }}
         </x-badge>
 

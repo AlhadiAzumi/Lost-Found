@@ -2008,6 +2008,14 @@ input[type="file"].input {
   flex: 1;
 }
 
+.item__category {
+  align-self: flex-start;
+  max-width: 100%;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .item__title {
   font-size: 16px;
   font-weight: 800;
@@ -4182,4 +4190,18 @@ input[type="file"].input {
   .info-page__grid--contact { grid-template-columns: 1fr; }
   .info-page__actions { flex-direction: column; }
   .info-page__actions .btn { width: 100%; }
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+  box-shadow: none;
 }
