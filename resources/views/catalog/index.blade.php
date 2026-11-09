@@ -8,6 +8,7 @@
         <form method="GET" action="{{ route('catalog.index') }}" class="hero__container">
             <div class="hero__top">
                 <div class="hero__copy">
+                    <x-campus-chip :campus="$currentCampus ?? null" variant="hero" />
                     <x-badge icon="heart-handshake" color="#bef264">
                         Saling Bantu, Barang Kembali
                     </x-badge>

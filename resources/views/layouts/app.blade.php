@@ -23,9 +23,13 @@
                 <img src="{{ asset('images/logo-mark.jpg') }}" alt="" class="brand__logo-img">
                 <span class="brand__name">
                     <strong>Campus Lost and Found</strong>
-                    <span>Portal</span>
+                    <span>{{ $isCampusPicker ? 'Portal' : (isset($currentCampus) ? 'Portal '.$currentCampus->name : 'Portal') }}</span>
                 </span>
             </a>
+
+            @unless ($isCampusPicker)
+                <x-campus-chip :campus="$currentCampus ?? null" variant="nav" />
+            @endunless
 
             {{-- Desktop Menu --}}
             <nav class="nav__menu" aria-label="Menu utama">
@@ -261,7 +265,7 @@
         <div class="footer__top">
             <div class="footer__identity">
                 <a class="footer__brand" href="{{ $isCampusPicker ? route('campuses.index') : route('home') }}">Lost &amp; Found</a>
-                <p>Layanan informasi barang hilang dan temuan di area kampus.</p>
+                <p>Layanan informasi barang hilang dan temuan di {{ $isCampusPicker ? 'area kampus' : (isset($currentCampus) ? $currentCampus->name : 'area kampus') }}.</p>
             </div>
             <nav class="footer__column" aria-label="Tautan layanan">
                 @if ($isCampusPicker)

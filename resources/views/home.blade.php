@@ -8,10 +8,11 @@
         <div class="home-hero__glow home-hero__glow--two"></div>
         <div class="home-shell home-hero__layout">
             <div class="home-hero__copy">
+                <x-campus-chip :campus="$currentCampus ?? null" variant="hero" />
                 <x-badge icon="heart-handshake" color="#bef264">Layanan barang hilang dan temuan kampus</x-badge>
                 <h1>Cari barang hilang<br><span>atau laporkan temuan.</span></h1>
                 <p class="home-hero__lead">
-                    Cari barang di katalog atau laporkan barang yang hilang dan ditemukan di area kampus.
+                    Cari barang di katalog atau laporkan barang yang hilang dan ditemukan di area {{ $currentCampus->name ?? 'kampus' }}.
                 </p>
                 <div class="home-hero__actions">
                     <a href="{{ route('catalog.index') }}" class="btn btn--primary">
