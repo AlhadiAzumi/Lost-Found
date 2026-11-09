@@ -23,7 +23,7 @@
                 <img src="{{ asset('images/logo-mark.jpg') }}" alt="" class="brand__logo-img">
                 <span class="brand__name">
                     <strong>Campus Lost and Found</strong>
-                    <span>{{ $isCampusPicker ? 'Portal' : (isset($currentCampus) ? 'Portal '.$currentCampus->name : 'Portal') }}</span>
+                    <span>Portal</span>
                 </span>
             </a>
 

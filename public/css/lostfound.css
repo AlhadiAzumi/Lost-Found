@@ -4802,13 +4802,6 @@ input[type="file"].input {
    Campus Context
    ========================================================================== */
 
-.brand__name span {
-  white-space: normal;
-  overflow: visible;
-  text-overflow: clip;
-  line-height: 1.25;
-}
-
 .campus-chip {
   display: inline-flex;
   align-items: center;
@@ -4854,17 +4847,12 @@ input[type="file"].input {
 }
 
 .campus-chip--nav {
-  flex-shrink: 1;
+  flex-shrink: 0;
   min-width: 0;
-  max-width: 230px;
+  max-width: 240px;
   gap: 6px;
   padding: 6px 10px;
   font-size: 11.5px;
-}
-
-.campus-chip--nav .campus-chip__action {
-  padding-left: 7px;
-  font-size: 10.5px;
 }
 
 .campus-chip--hero,
@@ -4878,9 +4866,20 @@ input[type="file"].input {
   margin-left: auto;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1400px) {
   .campus-chip--nav {
     display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .nav__menu,
+  .nav__account {
+    display: none;
+  }
+
+  .nav__hamburger {
+    display: flex;
   }
 }
 
@@ -4892,11 +4891,5 @@ input[type="file"].input {
 
   .campus-chip--page {
     margin-left: 0;
-  }
-}
-
-@media (max-width: 420px) {
-  .brand__name {
-    max-width: 148px;
   }
 }
