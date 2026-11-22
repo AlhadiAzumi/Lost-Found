@@ -1,366 +1,347 @@
 <!DOCTYPE html>
 <html lang="id">
+@php($isCampusPicker = request()->routeIs('campuses.index', 'campuses.directory', 'campus-applications.setup'))
+@php($unreadNotificationCount = auth()->check() ? auth()->user()->unreadNotifications()->count() : 0)
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Lost & Found Kampus')</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>@yield('title', 'Lost & Found')</title>
+    <link rel="icon" type="image/jpeg" href="{{ asset('images/logo-mark.jpg') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #c6d8c5 0%, #dbe5d4 48%, #afc7ae 100%);
-            color: #111827;
-            position: relative;
-            overflow-x: hidden;
-        }
-        /* Dekorasi daun blur di latar belakang sesuai mockup */
-        body::before, body::after {
-            content: '';
-            position: fixed;
-            border-radius: 50%;
-            filter: blur(45px);
-            z-index: 0;
-            pointer-events: none;
-        }
-        body::before {
-            width: 380px;
-            height: 380px;
-            background: rgba(52, 105, 72, 0.22);
-            bottom: -100px;
-            right: -60px;
-        }
-        body::after {
-            width: 300px;
-            height: 300px;
-            background: rgba(143, 188, 152, 0.35);
-            top: -80px;
-            left: 220px;
-        }
-
-        .app-shell {
-            position: relative;
-            z-index: 1;
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            min-height: 100vh;
-            padding: 1.25rem;
-            gap: 1.75rem;
-        }
-
-        /* Floating Glass Sidebar */
-        .sidebar {
-            background: rgba(242, 246, 241, 0.78);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 255, 255, 0.75);
-            border-radius: 28px;
-            padding: 1.75rem 1.15rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-shadow: 0 20px 40px -15px rgba(20, 45, 30, 0.1);
-            height: calc(100vh - 2.5rem);
-            position: sticky;
-            top: 1.25rem;
-        }
-        .sidebar-brand {
-            padding: 0 0.75rem 1.5rem;
-        }
-        .sidebar-brand a {
-            font-size: 1.35rem;
-            font-weight: 800;
-            color: #111111;
-            text-decoration: none;
-            letter-spacing: -0.03em;
-            display: block;
-        }
-        .campus-tag {
-            display: inline-block;
-            margin-top: 0.35rem;
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: #23593a;
-            background: rgba(35, 89, 58, 0.12);
-            padding: 0.2rem 0.65rem;
-            border-radius: 999px;
-        }
-
-        .nav-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.35rem;
-        }
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.78rem 1rem;
-            border-radius: 999px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #1f2937;
-            text-decoration: none;
-            transition: all 0.18s ease;
-        }
-        .nav-item:hover {
-            background: rgba(255, 255, 255, 0.7);
-            color: #111111;
-        }
-        .nav-item.active {
-            background: #111111;
-            color: #ffffff;
-            box-shadow: 0 8px 18px -6px rgba(17, 17, 17, 0.35);
-        }
-        .nav-item svg {
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-        }
-
-        .sidebar-footer {
-            border-top: 1px solid rgba(17, 24, 39, 0.08);
-            padding-top: 1rem;
-        }
-        .btn-logout {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            padding: 0.72rem 1rem;
-            border-radius: 999px;
-            border: none;
-            background: transparent;
-            color: #991b1b;
-            font-family: inherit;
-            font-size: 0.88rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.18s;
-        }
-        .btn-logout:hover {
-            background: rgba(254, 226, 226, 0.75);
-        }
-
-        /* Main Content */
-        .main-content {
-            padding: 0.5rem 0.75rem 2rem 0;
-            max-width: 1220px;
-            width: 100%;
-        }
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-        .page-title {
-            font-size: 1.85rem;
-            font-weight: 800;
-            color: #111111;
-            letter-spacing: -0.03em;
-        }
-
-        /* Glass Card & Form Controls Global */
-        .glass-panel {
-            background: rgba(244, 247, 243, 0.8);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(255, 255, 255, 0.78);
-            border-radius: 26px;
-            padding: 1.75rem;
-            box-shadow: 0 20px 42px -15px rgba(22, 42, 30, 0.1);
-        }
-        .field-label {
-            display: block;
-            font-size: 0.82rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 0.42rem;
-        }
-        .pill-input, .pill-select {
-            width: 100%;
-            padding: 0.82rem 1.15rem;
-            border-radius: 999px;
-            border: 1.5px solid transparent;
-            background: #ffffff;
-            font-family: inherit;
-            font-size: 0.9rem;
-            color: #111827;
-            outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .area-input {
-            width: 100%;
-            padding: 0.95rem 1.15rem;
-            border-radius: 20px;
-            border: 1.5px solid transparent;
-            background: #ffffff;
-            font-family: inherit;
-            font-size: 0.9rem;
-            color: #111827;
-            outline: none;
-            resize: vertical;
-            min-height: 96px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .pill-input:focus, .pill-select:focus, .area-input:focus {
-            border-color: #111111;
-            box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.08);
-        }
-        .btn-black {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            padding: 0.88rem 1.6rem;
-            border-radius: 999px;
-            border: none;
-            background: #111111;
-            color: #ffffff;
-            font-family: inherit;
-            font-size: 0.92rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-decoration: none;
-            transition: transform 0.15s ease, background 0.2s ease;
-        }
-        .btn-black:hover {
-            background: #262626;
-            transform: translateY(-1px);
-        }
-
-        .flash-banner {
-            padding: 0.85rem 1.2rem;
-            border-radius: 16px;
-            font-size: 0.88rem;
-            font-weight: 600;
-            margin-bottom: 1.25rem;
-        }
-        .flash-success { background: #d1fae5; color: #065f46; }
-        .flash-error { background: #fee2e2; color: #991b1b; }
-
-        @media (max-width: 960px) {
-            .app-shell { grid-template-columns: 1fr; }
-            .sidebar { height: auto; position: static; }
-        }
-    </style>
-    @stack('styles')
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
+    <link rel="stylesheet" href="{{ asset('css/lostfound.css') }}?v={{ hash_file('sha256', public_path('css/lostfound.css')) }}">
 </head>
-<body>
-    @php
-        $campusParam = request()->route('campus');
-        $campusSlug = is_object($campusParam)
-            ? $campusParam->slug
-            : ($campusParam ?: ($currentCampus->slug ?? request()->segment(2)));
-        $campusName = is_object($campusParam) ? $campusParam->name : ($currentCampus->name ?? strtoupper(str_replace('-', ' ', $campusSlug)));
-        $user = auth()->user();
-        $isAdmin = $user && in_array($user->role ?? '', ['admin', 'satpam', 'super_admin']);
-    @endphp
+<body class="{{ request()->routeIs('home') ? 'home-page' : (request()->routeIs('catalog.*') ? 'catalog-page' : '') }}">
 
-    <div class="app-shell">
-        <aside class="sidebar">
-            <div>
-                <div class="sidebar-brand">
-                    <a href="{{ Route::has('home') ? route('home', ['campus' => $campusSlug]) : url('/kampus/' . $campusSlug) }}">
-                        Lost &amp; Found
-                    </a>
-                    <span class="campus-tag">{{ $campusName }}</span>
-                </div>
+    {{-- ===== NAVBAR ===== --}}
+    <div class="nav-wrapper">
+        <header class="nav">
+            {{-- Brand --}}
+            <a href="{{ $isCampusPicker ? route('campuses.index') : route('home') }}" class="brand" aria-label="Campus Lost and Found Portal">
+                <img src="{{ asset('images/logo-mark.jpg') }}" alt="" class="brand__logo-img">
+                <span class="brand__name">
+                    <strong>Campus Lost and Found</strong>
+                    <span>Portal</span>
+                </span>
+            </a>
 
-                <nav class="nav-list">
+            @unless ($isCampusPicker)
+                <x-campus-chip :campus="$currentCampus ?? null" variant="nav" />
+            @endunless
+
+            {{-- Desktop Menu --}}
+            <nav class="nav__menu" aria-label="Menu utama">
+                @if ($isCampusPicker)
+                    <a href="{{ route('campuses.index') }}" class="nav__link is-active">Pilih Kampus</a>
                     @auth
-                        <a href="{{ route('profile.edit', ['campus' => $campusSlug]) }}"
-                           class="nav-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/></svg>
-                            Profil
-                        </a>
-
-                        <a href="{{ route('lost.create', ['campus' => $campusSlug]) }}"
-                           class="nav-item {{ request()->routeIs('lost.create') ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                            Lapor Hilang
-                        </a>
-
-                        <a href="{{ route('found.create', ['campus' => $campusSlug]) }}"
-                           class="nav-item {{ request()->routeIs('found.create') ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
-                            Lapor Temuan
-                        </a>
-                    @endauth
-
-                    <a href="{{ route('catalog.index', ['campus' => $campusSlug]) }}"
-                       class="nav-item {{ request()->routeIs('catalog.*') || request()->routeIs('items.show') ? 'active' : '' }}">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-                        Feed Publik
-                    </a>
-
-                    @auth
-                        <a href="{{ $isAdmin ? route('admin.claims', ['campus' => $campusSlug]) : route('my.history', ['campus' => $campusSlug]) }}"
-                           class="nav-item {{ request()->routeIs('admin.claims*') || request()->routeIs('my.history') || request()->routeIs('claims.*') ? 'active' : '' }}">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>
-                            Klaim
-                        </a>
-
-                        @if($isAdmin)
-                            <a href="{{ route('admin.handovers', ['campus' => $campusSlug]) }}"
-                               class="nav-item {{ request()->routeIs('admin.handovers*') ? 'active' : '' }}">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3zM18 18h3v3h-3z"/></svg>
-                                Serah Terima
-                            </a>
-
-                            <a href="{{ route('admin.dashboard', ['campus' => $campusSlug]) }}"
-                               class="nav-item {{ request()->routeIs('admin.dashboard') || request()->routeIs('admin.reports*') ? 'active' : '' }}">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20v-4"/></svg>
-                                Moderasi Admin
+                        @if (auth()->user()->role === 'admin' && filled(config('platform.admin_email')) && strcasecmp(auth()->user()->email, config('platform.admin_email')) === 0)
+                            <a href="{{ route('platform.campuses.index', ['campus' => null]) }}" class="nav__link {{ request()->routeIs('platform.campuses.*') ? 'is-active' : '' }}">
+                                Kelola Kampus
                             </a>
                         @endif
                     @endauth
-                </nav>
-            </div>
-
-            <div class="sidebar-footer">
-                @auth
-                    <form method="POST" action="{{ Route::has('logout') ? route('logout', ['campus' => $campusSlug]) : url('/kampus/'.$campusSlug.'/logout') }}">
-                        @csrf
-                        <button type="submit" class="btn-logout">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                            Keluar
-                        </button>
-                    </form>
                 @else
-                    <a href="{{ route('login', ['campus' => $campusSlug]) }}" class="btn-black" style="width:100%;">Masuk Akun</a>
+                <a href="{{ route('home') }}" class="nav__link {{ request()->routeIs('home') ? 'is-active' : '' }}">
+                    Beranda
+                </a>
+                <a href="{{ route('catalog.index') }}" class="nav__link {{ request()->routeIs('catalog.*') ? 'is-active' : '' }}">
+                    Katalog
+                </a>
+                <a href="{{ route('pages.about') }}" class="nav__link {{ request()->routeIs('pages.about') ? 'is-active' : '' }}">
+                    Tentang
+                </a>
+                <a href="{{ route('pages.safety') }}" class="nav__link {{ request()->routeIs('pages.safety') ? 'is-active' : '' }}">
+                    Keamanan
+                </a>
+                <a href="{{ route('pages.contact') }}" class="nav__link {{ request()->routeIs('pages.contact') ? 'is-active' : '' }}">
+                    Bantuan
+                </a>
+                <details class="nav__dropdown {{ request()->routeIs('campuses.*', 'pages.guide', 'pages.privacy', 'pages.terms', 'lost.create', 'found.create', 'my.history', 'admin.*', 'platform.campuses.*') ? 'is-active' : '' }}">
+                    <summary class="nav__link {{ request()->routeIs('campuses.*', 'pages.guide', 'pages.privacy', 'pages.terms', 'lost.create', 'found.create', 'my.history', 'admin.*', 'platform.campuses.*') ? 'is-active' : '' }}">
+                        Lainnya
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="m6 9 6 6 6-6"/>
+                        </svg>
+                    </summary>
+                    <div class="nav__dropdown-menu">
+                        @if (isset($currentCampus))
+                            <a href="{{ route('campuses.index') }}" class="nav__dropdown-link">Ganti Kampus ({{ $currentCampus->name }})</a>
+                        @endif
+                        <a href="{{ route('pages.guide') }}" class="nav__dropdown-link {{ request()->routeIs('pages.guide') ? 'is-active' : '' }}">Panduan Penggunaan</a>
+                        <a href="{{ route('pages.privacy') }}" class="nav__dropdown-link {{ request()->routeIs('pages.privacy') ? 'is-active' : '' }}">Privasi Data</a>
+                        <a href="{{ route('pages.terms') }}" class="nav__dropdown-link {{ request()->routeIs('pages.terms') ? 'is-active' : '' }}">Ketentuan Penggunaan</a>
+                        @auth
+                            <span class="nav__dropdown-divider"></span>
+                            <a href="{{ route('lost.create') }}" class="nav__dropdown-link {{ request()->routeIs('lost.create') ? 'is-active' : '' }}">Lapor Barang Hilang</a>
+                            <a href="{{ route('found.create') }}" class="nav__dropdown-link {{ request()->routeIs('found.create') ? 'is-active' : '' }}">Lapor Barang Temuan</a>
+                            <a href="{{ route('my.history') }}" class="nav__dropdown-link {{ request()->routeIs('my.history') ? 'is-active' : '' }}">Riwayat Aktivitas</a>
+                            @if (in_array(auth()->user()->role, ['admin', 'satpam'], true))
+                                <a href="{{ route('admin.dashboard') }}" class="nav__dropdown-link {{ request()->routeIs('admin.*') ? 'is-active' : '' }}">Panel Admin</a>
+                            @endif
+                            @if (auth()->user()->role === 'admin' && filled(config('platform.admin_email')) && strcasecmp(auth()->user()->email, config('platform.admin_email')) === 0)
+                                <a href="{{ route('platform.campuses.index', ['campus' => null]) }}" class="nav__dropdown-link {{ request()->routeIs('platform.campuses.*') ? 'is-active' : '' }}">Kelola Kampus</a>
+                            @endif
+                        @endauth
+                    </div>
+                </details>
+                @endif
+            </nav>
+
+            {{-- Notifications + Account --}}
+            @unless ($isCampusPicker)
+            @auth
+                <a href="{{ route('notifications.index') }}" class="nav__notif {{ request()->routeIs('notifications.*') ? 'is-active' : '' }}" title="Notifikasi" aria-label="Notifikasi ({{ $unreadNotificationCount }} belum dibaca)">
+                    <x-icon name="bell" :size="18" />
+                    @if ($unreadNotificationCount > 0)
+                        <span class="nav__notif-dot" aria-hidden="true"></span>
+                    @endif
+                </a>
+            @endauth
+            <div class="nav__account">
+                @guest
+                    <a href="{{ route('login') }}" class="btn btn--outline btn--sm">Masuk</a>
+                    <a href="{{ route('register') }}" class="btn btn--primary btn--sm">Daftar</a>
+                @endguest
+                @auth
+                    <div class="nav__user">
+                        <a href="{{ route('profile.edit') }}" class="nav__user-name" title="Profil saya">
+                            {{ auth()->user()->name }}
+                        </a>
+                        <form method="POST" action="{{ route('logout') }}" style="margin:0">
+                            @csrf
+                            <button type="submit" class="btn btn--ghost btn--sm" style="color:#ef4444;">Keluar</button>
+                        </form>
+                    </div>
                 @endauth
             </div>
-        </aside>
+            @endunless
 
-        <main class="main-content">
-            @if (session('success'))
-                <div class="flash-banner flash-success">{{ session('success') }}</div>
-            @endif
-            @if (session('error'))
-                <div class="flash-banner flash-error">{{ session('error') }}</div>
-            @endif
-            @if ($errors->any())
-                <div class="flash-banner flash-error">
-                    <ul style="padding-left:1.2rem;">
-                        @foreach ($errors->all() as $err)
-                            <li>{{ $err }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            @yield('content')
-        </main>
+            {{-- Hamburger (mobile) --}}
+            <button class="nav__hamburger" id="navHamburger" type="button" aria-label="Buka menu" aria-expanded="false" aria-controls="navDrawer">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+                </svg>
+            </button>
+        </header>
     </div>
 
-    @stack('scripts')
+    {{-- ===== MOBILE DRAWER ===== --}}
+    <div class="nav__drawer" id="navDrawer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Menu navigasi">
+        <div class="nav__drawer-overlay" id="navOverlay"></div>
+        <div class="nav__drawer-panel">
+            <div class="nav__drawer-close">
+                <strong>Menu</strong>
+                <button id="navDrawerClose" type="button" aria-label="Tutup menu">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M18 6 6 18M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            @if ($isCampusPicker)
+                <a href="{{ route('campuses.index') }}" class="nav__drawer-link is-active">
+                    <x-icon name="map-pin" :size="18" />
+                    Pilih Kampus
+                </a>
+                @auth
+                    @if (auth()->user()->role === 'admin' && filled(config('platform.admin_email')) && strcasecmp(auth()->user()->email, config('platform.admin_email')) === 0)
+                        <a href="{{ route('platform.campuses.index', ['campus' => null]) }}" class="nav__drawer-link">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/>
+                            </svg>
+                            Kelola Kampus
+                        </a>
+                    @endif
+                @endauth
+            @else
+            <a href="{{ route('home') }}" class="nav__drawer-link {{ request()->routeIs('home') ? 'is-active' : '' }}">
+                <x-icon name="heart-handshake" :size="18" />
+                Beranda
+            </a>
+            @if (isset($currentCampus))
+                <a href="{{ route('campuses.index') }}" class="nav__drawer-link">
+                    <x-icon name="map-pin" :size="18" />
+                    Ganti Kampus ({{ $currentCampus->name }})
+                </a>
+            @endif
+            @auth
+                @if (auth()->user()->role === 'admin' && filled(config('platform.admin_email')) && strcasecmp(auth()->user()->email, config('platform.admin_email')) === 0)
+                    <a href="{{ route('platform.campuses.index', ['campus' => null]) }}" class="nav__drawer-link">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/>
+                        </svg>
+                        Kelola Kampus
+                    </a>
+                @endif
+            @endauth
+            <a href="{{ route('catalog.index') }}" class="nav__drawer-link {{ request()->routeIs('catalog.*') ? 'is-active' : '' }}">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18M3 15h18M9 3v18M15 3v18" opacity=".3"/><rect width="18" height="18" x="3" y="3" rx="2"/></svg>
+                Katalog Barang
+            </a>
+            <div class="nav__drawer-divider"></div>
+            <a href="{{ route('pages.about') }}" class="nav__drawer-link {{ request()->routeIs('pages.about') ? 'is-active' : '' }}">
+                <x-icon name="info" :size="18" />
+                Tentang Layanan
+            </a>
+            <a href="{{ route('pages.guide') }}" class="nav__drawer-link {{ request()->routeIs('pages.guide') ? 'is-active' : '' }}">
+                <x-icon name="list-checks" :size="18" />
+                Panduan Penggunaan
+            </a>
+            <a href="{{ route('pages.safety') }}" class="nav__drawer-link {{ request()->routeIs('pages.safety') ? 'is-active' : '' }}">
+                <x-icon name="shield-check" :size="18" />
+                Keamanan
+            </a>
+            <a href="{{ route('pages.privacy') }}" class="nav__drawer-link {{ request()->routeIs('pages.privacy') ? 'is-active' : '' }}">
+                <x-icon name="lock-keyhole" :size="18" />
+                Privasi Data
+            </a>
+            <a href="{{ route('pages.contact') }}" class="nav__drawer-link {{ request()->routeIs('pages.contact') ? 'is-active' : '' }}">
+                <x-icon name="life-buoy" :size="18" />
+                Bantuan &amp; Kontak
+            </a>
+            <a href="{{ route('pages.terms') }}" class="nav__drawer-link {{ request()->routeIs('pages.terms') ? 'is-active' : '' }}">
+                <x-icon name="file-text" :size="18" />
+                Ketentuan Penggunaan
+            </a>
+
+            @auth
+                <div class="nav__drawer-divider"></div>
+                <a href="{{ route('lost.create') }}" class="nav__drawer-link {{ request()->routeIs('lost.create') ? 'is-active' : '' }}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    Lapor Barang Hilang
+                </a>
+                <a href="{{ route('found.create') }}" class="nav__drawer-link {{ request()->routeIs('found.create') ? 'is-active' : '' }}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/><path d="m8 11 3 3 4-4"/></svg>
+                    Lapor Barang Temuan
+                </a>
+                <a href="{{ route('my.history') }}" class="nav__drawer-link {{ request()->routeIs('my.history') ? 'is-active' : '' }}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                    Riwayat Aktivitas
+                </a>
+                <a href="{{ route('profile.edit') }}" class="nav__drawer-link {{ request()->routeIs('profile.*') ? 'is-active' : '' }}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+                    Profil Saya
+                </a>
+                @if (in_array(auth()->user()->role, ['admin', 'satpam'], true))
+                    <div class="nav__drawer-divider"></div>
+                    <a href="{{ route('admin.dashboard') }}" class="nav__drawer-link nav__drawer-link--admin {{ request()->routeIs('admin.*') ? 'is-active' : '' }}">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+                        Panel Admin
+                    </a>
+                @endif
+
+                <div class="nav__drawer-actions">
+                    <div style="font-size:13px; color:var(--muted); font-weight:600; padding: 0 2px;">
+                        Masuk sebagai <strong style="color:var(--ink);">{{ auth()->user()->name }}</strong>
+                    </div>
+                    <form method="POST" action="{{ route('logout') }}" style="margin:0">
+                        @csrf
+                        <button type="submit" class="btn btn--danger btn--block" style="justify-content: center;">
+                            Keluar dari Akun
+                        </button>
+                    </form>
+                </div>
+
+            @else
+                <div class="nav__drawer-divider"></div>
+                <div class="nav__drawer-actions">
+                    <a href="{{ route('login') }}" class="btn btn--outline btn--block" style="justify-content: center;">Masuk</a>
+                    <a href="{{ route('register') }}" class="btn btn--primary btn--block" style="justify-content: center;">Daftar Sekarang</a>
+                </div>
+            @endauth
+            @endif
+        </div>
+    </div>
+
+    {{-- ===== MAIN CONTENT ===== --}}
+    <main>
+        @yield('content')
+    </main>
+
+    {{-- ===== FOOTER ===== --}}
+    <footer class="footer footer--site">
+        <div class="footer__top">
+            <div class="footer__identity">
+                <a class="footer__brand" href="{{ $isCampusPicker ? route('campuses.index') : route('home') }}">Lost &amp; Found</a>
+                <p>Layanan informasi barang hilang dan temuan di {{ $isCampusPicker ? 'area kampus' : (isset($currentCampus) ? $currentCampus->name : 'area kampus') }}.</p>
+            </div>
+            <nav class="footer__column" aria-label="Tautan layanan">
+                @if ($isCampusPicker)
+                    <a href="{{ route('campuses.index') }}">Pilih Kampus</a>
+                @else
+                <a href="{{ route('pages.about') }}">Tentang</a>
+                <a href="{{ route('pages.guide') }}">Panduan</a>
+                <a href="{{ route('pages.safety') }}">Keamanan</a>
+                <a href="{{ route('pages.contact') }}">Bantuan</a>
+                <a href="{{ route('pages.privacy') }}">Privasi</a>
+                <a href="{{ route('pages.terms') }}">Ketentuan</a>
+                <a href="{{ route('catalog.index') }}">Katalog</a>
+                @endif
+            </nav>
+            <div class="footer__bottom">
+                <p>&copy; {{ date('Y') }} Lost &amp; Found.</p>
+            </div>
+        </div>
+    </footer>
+
+    {{-- ===== JS: Hamburger & Filter Toggle ===== --}}
+    <script>
+    (function() {
+        var hamburger = document.getElementById('navHamburger');
+        var drawer    = document.getElementById('navDrawer');
+        var overlay   = document.getElementById('navOverlay');
+        var closeBtn  = document.getElementById('navDrawerClose');
+
+        function openDrawer() {
+            drawer.classList.add('is-open');
+            drawer.setAttribute('aria-hidden', 'false');
+            hamburger.setAttribute('aria-expanded', 'true');
+            hamburger.setAttribute('aria-label', 'Tutup menu');
+            document.body.style.overflow = 'hidden';
+            closeBtn.focus();
+        }
+
+        function closeDrawer() {
+            if (!drawer.classList.contains('is-open')) return;
+
+            drawer.classList.remove('is-open');
+            drawer.setAttribute('aria-hidden', 'true');
+            hamburger.setAttribute('aria-expanded', 'false');
+            hamburger.setAttribute('aria-label', 'Buka menu');
+            document.body.style.overflow = '';
+            hamburger.focus();
+        }
+
+        if (hamburger && drawer && overlay && closeBtn) {
+            hamburger.addEventListener('click', function() {
+                if (hamburger.getAttribute('aria-expanded') === 'true') {
+                    closeDrawer();
+                } else {
+                    openDrawer();
+                }
+            });
+        }
+        if (overlay)   overlay.addEventListener('click', closeDrawer);
+        if (closeBtn)  closeBtn.addEventListener('click', closeDrawer);
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeDrawer();
+        });
+
+        // Filter toggle (catalog sidebar on mobile)
+        var filterToggle = document.getElementById('filterToggle');
+        var filterBody   = document.getElementById('filterBody');
+        if (filterToggle && filterBody) {
+            filterToggle.addEventListener('click', function() {
+                var open = filterBody.classList.toggle('is-open');
+                filterToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+                filterToggle.querySelector('.filter-toggle__icon').textContent = open ? '−' : '+';
+            });
+        }
+    })();
+    </script>
+
 </body>
 </html>

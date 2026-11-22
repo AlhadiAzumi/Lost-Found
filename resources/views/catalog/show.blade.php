@@ -1,144 +1,139 @@
 @extends('layouts.app')
 
-@section('title', $item->title . ' — Detail Barang')
-
-@push('styles')
-<style>
-    .detail-grid {
-        display: grid;
-        grid-template-columns: 1fr 1.1fr;
-        gap: 1.5rem;
-        align-items: start;
-    }
-    .detail-photo {
-        width: 100%;
-        max-height: 380px;
-        object-fit: cover;
-        border-radius: 22px;
-        background: linear-gradient(135deg, #a9cbb2, #8ab496);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 260px;
-        font-weight: 700;
-        color: #1f2937;
-    }
-    .meta-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 1.1rem 0;
-    }
-    .meta-table td {
-        padding: 0.65rem 0;
-        border-bottom: 1px solid rgba(17, 24, 39, 0.08);
-        font-size: 0.88rem;
-    }
-    .meta-table td:first-child {
-        color: #6b7280;
-        font-weight: 600;
-        width: 150px;
-    }
-    .meta-table td:last-child {
-        color: #111111;
-        font-weight: 700;
-    }
-    .desc-box {
-        background: #ffffff;
-        border-radius: 18px;
-        padding: 1rem 1.2rem;
-        font-size: 0.9rem;
-        line-height: 1.65;
-        color: #374151;
-        margin-bottom: 1.35rem;
-    }
-    @media (max-width: 900px) {
-        .detail-grid { grid-template-columns: 1fr; }
-    }
-</style>
-@endpush
+@section('title', $item->title . ' | Lost & Found')
 
 @section('content')
-    @php
-        $campusParam = request()->route('campus');
-        $campusSlug = is_object($campusParam)
-            ? $campusParam->slug
-            : ($campusParam ?: ($currentCampus->slug ?? request()->segment(2)));
+<div class="page-wrap page-wrap--medium">
+    <a href="{{ route('catalog.index') }}" class="btn btn--ghost" style="margin-bottom:24px; display:inline-flex; align-items:center; gap:8px; padding-left:0;">
+        <x-icon name="arrow-left" :size="18" /> Kembali ke Katalog
+    </a>
 
-        $isFound = in_array($item->type, ['found', 'ditemukan']);
-        $canClaim = auth()->check()
-            && $isFound
-            && in_array($item->status, ['approved', 'disetujui'])
-            && auth()->id() !== $item->user_id;
+    @if (session('success'))
+        <div class="alert alert--success">
+            <x-icon name="circle-check" :size="18" />
+            <span><strong>Berhasil!</strong> {{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="alert alert--error">
+            <x-icon name="circle-x" :size="18" />
+            <span><strong>Peringatan:</strong> {{ session('error') }}</span>
+        </div>
+    @endif
+
+    @php
+        $isFound  = in_array($item->type, ['found', 'ditemukan']);
+        $canClaim = $isFound && in_array($item->status, ['approved', 'disetujui']);
     @endphp
 
-    <div class="page-header">
-        <h1 class="page-title">Detail Laporan Barang</h1>
-        <a href="{{ route('catalog.index', ['campus' => $campusSlug]) }}"
-           style="padding:0.65rem 1.25rem; border-radius:999px; background:#ffffff; color:#111111; font-weight:700; font-size:0.84rem; text-decoration:none;">
-            ← Kembali ke Feed
-        </a>
-    </div>
+    <div class="card" style="padding:32px;">
+        <div class="detail-grid">
+            {{-- Foto Barang --}}
+            <div>
+                <div class="detail-photo">
+                    <img src="{{ $item->photo_url }}" alt="{{ $item->title }}">
+                    <div class="detail-photo__badge">
+                        <x-badge :icon="$isFound ? 'search-check' : 'search'" :color="$isFound ? '#a3e636' : '#fee2e2'">
+                            {{ $isFound ? 'Barang Ditemukan' : 'Barang Hilang' }}
+                        </x-badge>
+                    </div>
+                </div>
 
-    <div class="detail-grid">
-        <div class="glass-panel">
-            @if ($item->image)
-                <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->title }}" class="detail-photo">
-            @else
-                <div class="detail-photo">Tidak ada foto yang diunggah</div>
-            @endif
-        </div>
-
-        <div class="glass-panel">
-            <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.75rem;">
-                <span style="padding:0.28rem 0.85rem; border-radius:999px; font-size:0.76rem; font-weight:700; {{ $isFound ? 'background:#d1fae5;color:#065f46;' : 'background:#fee2e2;color:#b91c1c;' }}">
-                    {{ $isFound ? 'Barang Ditemukan' : 'Barang Hilang' }}
-                </span>
-                <span style="padding:0.28rem 0.85rem; border-radius:999px; font-size:0.76rem; font-weight:700; background:#ffffff; color:#111827;">
-                    Status: {{ ucfirst(str_replace('_', ' ', $item->status)) }}
-                </span>
+                @if ($isFound && !empty($item->security_question))
+                    <div class="card panel panel--mint" style="margin-top:16px;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+                            <x-icon name="shield-check" :size="16" />
+                            <strong style="font-size:13.5px;color:#166534;">Dilindungi Pertanyaan Keamanan</strong>
+                        </div>
+                        <p style="margin:0;font-size:13px;color:#14532d;line-height:1.5;">
+                            Calon pemilik wajib menjawab pertanyaan verifikasi dari penemu sebelum dapat mengambil barang.
+                        </p>
+                    </div>
+                @endif
             </div>
 
-            <h2 style="font-size:1.55rem; font-weight:800; color:#111111; letter-spacing:-0.02em;">
-                {{ $item->title }}
-            </h2>
+            {{-- Detail Info --}}
+            <div class="detail-info">
+                {{-- Badges status --}}
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <x-badge :icon="$item->category->icon ?? 'tag'" :color="$item->category->color ?? '#dbeafe'">
+                        {{ $item->category->name ?? 'Lainnya' }}
+                    </x-badge>
 
-            <table class="meta-table">
-                <tr>
-                    <td>Kategori</td>
-                    <td>{{ $item->category->name ?? '-' }}</td>
-                </tr>
-                <tr>
-                    <td>Lokasi</td>
-                    <td>{{ $item->location }}</td>
-                </tr>
-                <tr>
-                    <td>Tanggal Kejadian</td>
-                    <td>{{ \Carbon\Carbon::parse($item->date_event)->translatedFormat('d F Y') }}</td>
-                </tr>
-                <tr>
-                    <td>Dilaporkan oleh</td>
-                    <td>{{ $item->user->name ?? 'Warga Kampus' }}</td>
-                </tr>
-            </table>
-
-            <div class="field-label">Deskripsi Barang</div>
-            <div class="desc-box">{{ $item->description }}</div>
-
-            @if ($canClaim)
-                <a href="{{ route('claims.create', ['campus' => $campusSlug, 'item' => $item]) }}"
-                   class="btn-black"
-                   style="width:100%;">
-                    Ajukan Klaim Kepemilikan
-                </a>
-            @elseif (auth()->check() && auth()->id() === $item->user_id)
-                <div style="background:#ffffff; padding:0.85rem 1.1rem; border-radius:16px; font-size:0.84rem; color:#4b5563; text-align:center;">
-                    Ini adalah laporan yang kamu buat sendiri.
+                    @if(in_array($item->status, ['approved','disetujui']))
+                        <x-badge icon="circle-check" color="#d1fae8">Aktif &amp; Disetujui</x-badge>
+                    @elseif(in_array($item->status, ['claim_in_progress','proses_klaim']))
+                        <x-badge icon="clock" color="#dbeafe">Dalam Proses Klaim</x-badge>
+                    @elseif(in_array($item->status, ['returned','selesai']))
+                        <x-badge icon="check-check" color="#a3e636">Sudah Dikembalikan</x-badge>
+                    @else
+                        <x-badge icon="clock" color="#fef3c7">{{ ucfirst($item->status) }}</x-badge>
+                    @endif
                 </div>
-            @elseif (!auth()->check() && $isFound && $item->status === 'approved')
-                <a href="{{ route('login', ['campus' => $campusSlug]) }}" class="btn-black" style="width:100%;">
-                    Masuk Akun untuk Mengajukan Klaim
-                </a>
-            @endif
+
+                <h1 class="detail-title">{{ $item->title }}</h1>
+
+                <div class="detail-meta">
+                    <div class="detail-meta-row">
+                        <x-icon name="map-pin" :size="17" />
+                        <span><strong>Lokasi:</strong> {{ $item->location }}</span>
+                    </div>
+                    <div class="detail-meta-row">
+                        <x-icon name="calendar-days" :size="17" />
+                        <span><strong>Tanggal:</strong> {{ $item->date_event ? $item->date_event->translatedFormat('d F Y') : '-' }}</span>
+                    </div>
+                    <div class="detail-meta-row">
+                        <x-icon name="user" :size="17" />
+                        <span><strong>Pelapor:</strong> {{ $item->user->name ?? 'Anonim Kampus' }}</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="font-size:14px;font-weight:700;margin-bottom:8px;">Deskripsi Barang</h3>
+                    <div class="detail-desc">{{ $item->description ?: 'Tidak ada deskripsi rinci.' }}</div>
+                </div>
+                @if ($item->status === 'rejected' && $item->rejection_reason)
+                    <div class="alert alert--error">
+                        <x-icon name="info" :size="18" />
+                        <span><strong>Alasan penolakan:</strong> {{ $item->rejection_reason }}</span>
+                    </div>
+                @endif
+
+                {{-- Tombol Klaim --}}
+                <div class="detail-action">
+                    @if ($canClaim)
+                        @auth
+                            @if (auth()->id() === $item->user_id)
+                                <div class="card panel panel--amber" style="font-size:14px;">
+                                    Ini adalah barang temuan yang kamu laporkan sendiri.
+                                </div>
+                            @else
+                                <a href="{{ route('claims.create', ['item' => $item]) }}" class="btn btn--primary btn--block btn--lg" style="justify-content:center;">
+                                    <x-icon name="handshake" :size="20" /> Ajukan Klaim Kepemilikan
+                                </a>
+                            @endif
+                        @else
+                            <div class="card panel panel--mint" style="text-align:center;">
+                                <p style="margin-bottom:14px;font-size:14px;font-weight:600;">
+                                    Merasa ini barang milikmu? Masuk ke akunmu untuk mengajukan verifikasi klaim.
+                                </p>
+                                <a href="{{ route('login') }}" class="btn btn--primary">Masuk &amp; Ajukan Klaim</a>
+                            </div>
+                        @endauth
+                    @elseif($isFound)
+                        <div class="card panel" style="text-align:center;color:var(--muted);font-size:14px;font-weight:600;">
+                            Barang ini sedang dalam proses klaim atau sudah dikembalikan ke pemiliknya.
+                        </div>
+                    @else
+                        <div class="alert alert--error" style="margin-bottom:0;">
+                            <x-icon name="info" :size="18" />
+                            <span><strong>Catatan:</strong> Jika kamu menemukan barang ini di kampus, silakan serahkan ke pos satpam atau buat laporan penemuan barang.</span>
+                        </div>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
+</div>
 @endsection
