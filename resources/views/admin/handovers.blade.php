@@ -1,122 +1,227 @@
 @extends('layouts.app')
 
-@section('title', 'Serah Terima Barang | Lost & Found')
+@section('title', 'Serah Terima Barang — Lost & Found')
+
+@push('styles')
+<style>
+    .handover-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.15fr;
+        gap: 1.5rem;
+        align-items: start;
+    }
+    .code-search-form {
+        display: flex;
+        gap: 0.65rem;
+        margin-top: 0.75rem;
+    }
+    .code-input {
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 800;
+    }
+    .claim-ticket {
+        margin-top: 1.25rem;
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 1.25rem;
+        border: 1.5px solid rgba(17, 17, 17, 0.1);
+    }
+    .ticket-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.5rem;
+        padding-bottom: 0.85rem;
+        border-bottom: 1px dashed rgba(17, 24, 39, 0.15);
+        margin-bottom: 0.95rem;
+    }
+    .ticket-code {
+        font-size: 1.05rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        color: #111111;
+    }
+    .ticket-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        margin-bottom: 0.55rem;
+        gap: 1rem;
+    }
+    .ticket-row span:first-child { color: #6b7280; }
+    .ticket-row span:last-child { font-weight: 700; color: #111111; text-align: right; }
+
+    .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 0.75rem;
+    }
+    .history-table th {
+        text-align: left;
+        font-size: 0.75rem;
+        color: #6b7280;
+        padding: 0.65rem 0.5rem;
+        border-bottom: 1px solid rgba(17, 24, 39, 0.1);
+    }
+    .history-table td {
+        padding: 0.85rem 0.5rem;
+        font-size: 0.84rem;
+        border-bottom: 1px solid rgba(17, 24, 39, 0.06);
+        vertical-align: middle;
+    }
+    .status-done {
+        display: inline-block;
+        padding: 0.22rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    @media (max-width: 960px) {
+        .handover-grid { grid-template-columns: 1fr; }
+    }
+</style>
+@endpush
 
 @section('content')
-<div class="admin-page admin-page--narrow">
-    <header class="admin-page__header">
-        <div>
-            <a href="{{ route('admin.dashboard') }}" class="admin-page__back">&larr; Dashboard</a>
-            <h1 class="admin-page__title">Serah Terima Barang</h1>
-            <p class="admin-page__description">Masukkan kode dari pemilik, lalu cocokkan identitas sebelum menyerahkan barang.</p>
-        </div>
-    </header>
+    @php
+        $campusParam = request()->route('campus');
+        $campusSlug = is_object($campusParam)
+            ? $campusParam->slug
+            : ($campusParam ?: ($currentCampus->slug ?? request()->segment(2)));
+    @endphp
 
-    @include('admin.navigation')
+    <div class="page-header">
+        <h1 class="page-title">Serah Terima Pos Satpam</h1>
+    </div>
 
-    @if (session('success'))
-        <div class="card panel panel--mint admin-page__notice">
-            <strong>✓ Berhasil!</strong> {{ session('success') }}
-        </div>
-    @endif
+    <div class="handover-grid">
+        {{-- Kolom Kiri: Cari & Proses Kode Serah Terima --}}
+        <div class="glass-panel">
+            <h2 style="font-size:1.05rem; font-weight:800; color:#111111;">Verifikasi Kode Pengambilan</h2>
+            <p style="font-size:0.82rem; color:#4b5563; margin-top:0.25rem;">
+                Masukkan kode serah terima (contoh: <strong>LFP-XXXX-XXXX</strong>) yang ditunjukkan pemilik barang.
+            </p>
 
-    @if (session('error'))
-        <div class="card panel admin-page__notice admin-page__notice--error">
-            <strong>✕ Peringatan:</strong> {{ session('error') }}
-        </div>
-    @endif
+            <form method="GET" action="{{ route('admin.handovers', ['campus' => $campusSlug]) }}" class="code-search-form">
+                <input
+                    type="text"
+                    name="code"
+                    value="{{ $searchCode ?? '' }}"
+                    placeholder="LFP-XXXX-XXXX"
+                    class="pill-input code-input"
+                    required
+                >
+                <button type="submit" class="btn-black">Cek Kode</button>
+            </form>
 
-    {{-- Form Pencarian Kode --}}
-    <section class="admin-surface admin-handover-search">
-        <form method="GET" action="{{ route('admin.handovers') }}" class="admin-handover-search__form">
-            <input type="text" name="code" value="{{ $searchCode }}" placeholder="Contoh: LFP-ABCD-1234" required
-                   class="input admin-handover-search__input">
-            <button type="submit" class="btn btn--primary admin-handover-search__button">Periksa Kode</button>
-        </form>
-    </section>
-
-    {{-- Hasil Validasi Kode --}}
-    @if ($searchCode)
-        @if ($claimToHandover)
-            <section class="admin-surface admin-handover-result">
-                <div class="admin-handover-result__header">
-                    <div style="padding: 8px; background: #a3e636; border: 1.5px solid #111; border-radius: 10px;">
-                        <x-icon name="check-check" :size="24" />
-                    </div>
-                    <div>
-                        <h2 style="font-size: 20px; font-weight: 800; margin: 0; color: #111;">KODE VALID & TERVERIFIKASI</h2>
-                        <span style="font-size: 13px; color: #166534;">Kode ini berhak mengambil barang berikut:</span>
-                    </div>
+            @if (!empty($searchCode) && !$claimToHandover)
+                <div style="margin-top:1.1rem; padding:0.95rem 1.1rem; border-radius:16px; background:#fee2e2; color:#991b1b; font-size:0.84rem; font-weight:600;">
+                    Kode <strong>{{ strtoupper($searchCode) }}</strong> tidak ditemukan. Periksa kembali penulisan kode.
                 </div>
-
-                <div class="admin-handover-details">
-                    <div class="admin-handover-details__item">
-                        <span>Nama barang</span>
-                        <strong>{{ $claimToHandover->item->title ?? '-' }}</strong>
+            @elseif ($claimToHandover)
+                <div class="claim-ticket">
+                    <div class="ticket-header">
+                        <span class="ticket-code">{{ $claimToHandover->handover_code }}</span>
+                        <span style="padding:0.24rem 0.72rem; border-radius:999px; font-size:0.74rem; font-weight:700; {{ $claimToHandover->status === 'approved' ? 'background:#dbeafe;color:#1e40af;' : 'background:#d1fae5;color:#065f46;' }}">
+                            {{ $claimToHandover->status === 'approved' ? 'Siap Diserahkan' : ucfirst($claimToHandover->status) }}
+                        </span>
                     </div>
-                    <div class="admin-handover-details__item">
-                        <span>Pemilik (pengklaim)</span>
-                        <strong>{{ $claimToHandover->user->name ?? '-' }}</strong>
-                        <small>NIM/NIP: {{ $claimToHandover->user->nim_nip ?? 'Belum diisi' }}</small>
-                    </div>
-                </div>
 
-                @if ($claimToHandover->status === 'approved' && !$claimToHandover->handover)
-                    <form method="POST" action="{{ route('admin.handovers.process', ['claim' => $claimToHandover]) }}">
-                        @csrf
-                        <input type="hidden" name="code" value="{{ $claimToHandover->handover_code }}">
-                        <div class="admin-handover-notes">
-                            <label for="notes">Catatan penyerahan (opsional)</label>
-                            <input type="text" id="notes" name="notes" placeholder="Contoh: KTM fisik sudah dicocokkan." class="input">
+                    <div class="ticket-row">
+                        <span>Nama Barang</span>
+                        <span>{{ $claimToHandover->item->title ?? '-' }}</span>
+                    </div>
+                    <div class="ticket-row">
+                        <span>Penerima / Pemilik</span>
+                        <span>{{ $claimToHandover->user->name ?? '-' }}</span>
+                    </div>
+                    <div class="ticket-row">
+                        <span>NIM / NIP</span>
+                        <span>{{ $claimToHandover->user->nim_nip ?? '-' }}</span>
+                    </div>
+                    <div class="ticket-row" style="margin-bottom:0;">
+                        <span>Lokasi Temuan</span>
+                        <span>{{ $claimToHandover->item->location ?? '-' }}</span>
+                    </div>
+
+                    @if ($claimToHandover->status === 'approved')
+                        <form action="{{ route('admin.handovers.process', ['campus' => $campusSlug, 'claim' => $claimToHandover]) }}"
+                              method="POST"
+                              style="margin-top:1.2rem; padding-top:1rem; border-top:1px solid rgba(17,24,39,0.08);">
+                            @csrf
+                            <input type="hidden" name="code" value="{{ $claimToHandover->handover_code }}">
+
+                            <div style="margin-bottom:0.9rem;">
+                                <label for="notes" class="field-label">Catatan Serah Terima (opsional)</label>
+                                <textarea
+                                    id="notes"
+                                    name="notes"
+                                    placeholder="Contoh: KTM penerima sudah dicek sesuai nama akun"
+                                    class="area-input"
+                                    style="min-height:74px; background:#f8fafc;"
+                                ></textarea>
+                            </div>
+
+                            <button type="submit" class="btn-black" style="width:100%;">
+                                Konfirmasi Serah Terima
+                            </button>
+                        </form>
+                    @else
+                        <div style="margin-top:1rem; padding:0.75rem 1rem; border-radius:14px; background:#f3f4f6; font-size:0.82rem; color:#374151; text-align:center;">
+                            Klaim dengan kode ini sudah selesai diserahkan.
                         </div>
+                    @endif
+                </div>
+            @endif
+        </div>
 
-                        <button type="submit" class="btn btn--primary admin-handover-confirm">
-                            Konfirmasi & Serahkan Barang
-                        </button>
-                    </form>
-                @else
-                    <div class="admin-handover-expired">
-                        Barang ini sudah pernah diserahkan sebelumnya dan kodenya telah hangus!
+        {{-- Kolom Kanan: Riwayat Serah Terima Terbaru --}}
+        <div class="glass-panel">
+            <h2 style="font-size:1.05rem; font-weight:800; color:#111111;">Riwayat Serah Terima</h2>
+
+            @if (($recentHandovers ?? collect())->isEmpty())
+                <p style="font-size:0.85rem; color:#4b5563; margin-top:0.85rem;">
+                    Belum ada barang yang tercatat diserahkan.
+                </p>
+            @else
+                <div style="overflow-x:auto;">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Barang</th>
+                                <th>Penerima</th>
+                                <th>Petugas</th>
+                                <th>Waktu</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($recentHandovers as $handover)
+                                <tr>
+                                    <td style="font-weight:700; color:#111111;">
+                                        {{ $handover->item->title ?? '-' }}
+                                        <div><span class="status-done">Dikembalikan</span></div>
+                                    </td>
+                                    <td>{{ $handover->recipient->name ?? '-' }}</td>
+                                    <td style="color:#4b5563;">{{ $handover->officer->name ?? '-' }}</td>
+                                    <td style="color:#6b7280; white-space:nowrap;">
+                                        {{ \Carbon\Carbon::parse($handover->handover_date)->translatedFormat('d M Y, H:i') }}
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+
+                @if ($recentHandovers->hasPages())
+                    <div style="margin-top:1rem;">
+                        {{ $recentHandovers->links() }}
                     </div>
                 @endif
-            </section>
-        @else
-            <div class="admin-handover-not-found">
-                <strong>Kode tidak ditemukan</strong>
-                <p>Pastikan kode serah terima yang diketik sudah benar.</p>
-            </div>
-        @endif
-    @endif
-
-    {{-- Riwayat Serah Terima --}}
-    <section class="admin-surface admin-handover-history">
-        <h2>Riwayat serah terima</h2>
-        <div class="admin-table-wrap">
-        <table class="admin-table admin-table--handovers">
-            <thead>
-                <tr style="border-bottom: 2px solid #111;">
-                    <th style="padding: 10px 6px;">Barang</th>
-                    <th style="padding: 10px 6px;">Penerima</th>
-                    <th style="padding: 10px 6px;">Petugas</th>
-                    <th style="padding: 10px 6px;">Waktu</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($recentHandovers as $handover)
-                    <tr style="border-bottom: 1px solid #e5e7eb;">
-                        <td style="padding: 12px 6px; font-weight: 700;">{{ $handover->item->title ?? '-' }}</td>
-                        <td style="padding: 12px 6px;">{{ $handover->recipient->name ?? '-' }}</td>
-                        <td style="padding: 12px 6px;">{{ $handover->officer->name ?? '-' }}</td>
-                        <td style="padding: 12px 6px; color: #6b7280;">{{ $handover->handover_date ? $handover->handover_date->translatedFormat('d M Y, H:i') : '-' }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="4" style="padding: 20px; text-align: center; color: #6b7280;">Belum ada riwayat penyerahan barang.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+            @endif
         </div>
-    </section>
-</div>
+    </div>
 @endsection

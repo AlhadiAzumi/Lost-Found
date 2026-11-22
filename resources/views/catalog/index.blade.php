@@ -1,186 +1,319 @@
 @extends('layouts.app')
 
-@section('title', 'Katalog Barang | Lost & Found')
+@section('title', 'Feed Publik — Lost & Found')
+
+@push('styles')
+<style>
+    .catalog-layout {
+        display: grid;
+        grid-template-columns: 270px 1fr;
+        gap: 1.5rem;
+        align-items: start;
+    }
+    .filter-group { margin-bottom: 1rem; }
+    .type-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.4rem;
+        background: #ffffff;
+        padding: 0.3rem;
+        border-radius: 999px;
+        margin-bottom: 1rem;
+    }
+    .type-tab {
+        text-align: center;
+        padding: 0.48rem 0.4rem;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #4b5563;
+        text-decoration: none;
+        transition: all 0.18s;
+    }
+    .type-tab.active {
+        background: #111111;
+        color: #ffffff;
+    }
+
+    /* Search Bar Atas */
+    .search-bar {
+        display: flex;
+        gap: 0.65rem;
+        margin-bottom: 1.25rem;
+        flex-wrap: wrap;
+    }
+    .search-bar .pill-input {
+        flex: 1;
+        min-width: 220px;
+    }
+
+    /* Grid Kartu Barang */
+    .items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(265px, 1fr));
+        gap: 1.25rem;
+    }
+    .item-card {
+        background: rgba(244, 247, 243, 0.86);
+        backdrop-filter: blur(18px);
+        border: 1px solid rgba(255, 255, 255, 0.8);
+        border-radius: 24px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 16px 32px -14px rgba(22, 42, 30, 0.12);
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+    .item-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 22px 40px -14px rgba(22, 42, 30, 0.18);
+    }
+    .card-thumb {
+        width: 100%;
+        height: 175px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #a9cbb2, #8ab496);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #1f2937;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+    .card-body {
+        padding: 1.15rem 1.25rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+        flex: 1;
+    }
+    .badge-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .pill-badge {
+        padding: 0.24rem 0.72rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+    }
+    .badge-found { background: #d1fae5; color: #065f46; }
+    .badge-lost { background: #fee2e2; color: #b91c1c; }
+    .badge-progress { background: #fef3c7; color: #92400e; }
+    .badge-returned { background: #e5e7eb; color: #374151; }
+
+    .card-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: #111111;
+        line-height: 1.3;
+    }
+    .card-meta {
+        font-size: 0.78rem;
+        color: #4b5563;
+        line-height: 1.5;
+    }
+    .card-desc {
+        font-size: 0.82rem;
+        color: #374151;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        margin-bottom: 0.4rem;
+    }
+
+    @media (max-width: 920px) {
+        .catalog-layout { grid-template-columns: 1fr; }
+    }
+</style>
+@endpush
 
 @section('content')
-    {{-- ===== HERO ===== --}}
-    <section class="hero">
-        <form method="GET" action="{{ route('catalog.index') }}" class="hero__container">
-            <div class="hero__top">
-                <div class="hero__copy">
-                    <x-campus-chip :campus="$currentCampus ?? null" variant="hero" />
-                    <x-badge icon="heart-handshake" color="#bef264">
-                        Saling Bantu, Barang Kembali
-                    </x-badge>
-                    <h1 class="hero__title">Temukan barangmu,<br>kembalikan milik orang lain.</h1>
-                    <p class="hero__lead">
-                        Cari barang yang hilang atau laporkan temuan di area kampus. Serah-terima dilakukan melalui petugas pos satpam.
-                    </p>
-                    <div class="hero__stats">
-                        <div class="hero__stat">
-                            <span class="hero__stat-num">{{ $items->total() }}</span>
-                            <span class="hero__stat-label">Barang Terdata</span>
-                        </div>
-                        <div class="hero__stat">
-                            <span class="hero__stat-num" style="color:#0284c7;">Pos Satpam</span>
-                            <span class="hero__stat-label">Pusat Titik Temu</span>
-                        </div>
-                    </div>
-                </div>
+    @php
+        $campusParam = request()->route('campus');
+        $campusSlug = is_object($campusParam)
+            ? $campusParam->slug
+            : ($campusParam ?: ($currentCampus->slug ?? request()->segment(2)));
 
-                <div class="cta-card">
-                    <div class="cta-card__header">
-                        <x-icon name="plus-circle" :size="20" />
-                        <h2>Lapor Cepat</h2>
-                    </div>
-                    <p>Bantu sesama warga kampus lewat satu laporan singkat.</p>
-                    <div class="cta-card__btns">
-                        <a href="{{ route('lost.create') }}" class="btn btn--primary" style="text-align:center;">
-                            <x-icon name="search" :size="16" /> Lapor Barang Hilang
-                        </a>
-                        <a href="{{ route('found.create') }}" class="btn btn--sky" style="text-align:center;">
-                            <x-icon name="search-check" :size="16" /> Lapor Barang Temuan
-                        </a>
-                    </div>
-                </div>
+        $activeType = $filters['type'] ?? null;
+    @endphp
+
+    <div class="page-header">
+        <h1 class="page-title">Feed Publik Barang Kampus</h1>
+        <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+            @auth
+                <a href="{{ route('lost.create', ['campus' => $campusSlug]) }}"
+                   style="padding:0.68rem 1.2rem; border-radius:999px; background:#ffffff; color:#111111; font-weight:700; font-size:0.84rem; text-decoration:none;">
+                    + Lapor Hilang
+                </a>
+                <a href="{{ route('found.create', ['campus' => $campusSlug]) }}" class="btn-black" style="padding:0.68rem 1.2rem; font-size:0.84rem;">
+                    + Lapor Temuan
+                </a>
+            @endauth
+        </div>
+    </div>
+
+    <div class="catalog-layout">
+        {{-- Sidebar Filter Kiri --}}
+        <aside class="glass-panel" style="padding:1.35rem;">
+            <h2 style="font-size:1rem; font-weight:800; margin-bottom:0.9rem; color:#111111;">Filter Barang</h2>
+
+            {{-- Tab Tipe Cepat --}}
+            <div class="type-tabs">
+                <a href="{{ route('catalog.index', array_merge(['campus' => $campusSlug], request()->except('type', 'page'))) }}"
+                   class="type-tab {{ !$activeType ? 'active' : '' }}">Semua</a>
+                <a href="{{ route('catalog.index', array_merge(['campus' => $campusSlug], request()->except('page'), ['type' => 'found'])) }}"
+                   class="type-tab {{ in_array($activeType, ['found', 'ditemukan']) ? 'active' : '' }}">Temuan</a>
+                <a href="{{ route('catalog.index', array_merge(['campus' => $campusSlug], request()->except('page'), ['type' => 'lost'])) }}"
+                   class="type-tab {{ in_array($activeType, ['lost', 'hilang']) ? 'active' : '' }}">Hilang</a>
             </div>
 
-            {{-- Search --}}
-            <div class="search-box">
-                <x-icon name="search" :size="22" />
-                <input type="search" name="q" value="{{ $filters['q'] }}"
-                       placeholder="Cari nama barang, warna, lokasi, atau deskripsi..." aria-label="Cari barang">
-                <button type="submit" class="btn btn--primary" style="padding: 10px 24px; flex-shrink:0;">Cari</button>
-            </div>
-
-            {{-- Simpan state --}}
-            @foreach (['type','category','location','from','to','sort'] as $key)
-                @if ($filters[$key])
-                    <input type="hidden" name="{{ $key }}" value="{{ $filters[$key] }}">
+            <form method="GET" action="{{ route('catalog.index', ['campus' => $campusSlug]) }}">
+                @if ($activeType)
+                    <input type="hidden" name="type" value="{{ $activeType }}">
                 @endif
-            @endforeach
-        </form>
-    </section>
+                @if (!empty($filters['q']))
+                    <input type="hidden" name="q" value="{{ $filters['q'] }}">
+                @endif
 
-    {{-- ===== CATALOG BODY ===== --}}
-    <div class="catalog">
-        {{-- Sidebar Filter --}}
-        <aside class="sidebar">
-            {{-- Mobile filter toggle --}}
-            <button class="filter-toggle" id="filterToggle" aria-expanded="false">
-                <span style="display:flex;align-items:center;gap:8px;">
-                    <x-icon name="sliders-horizontal" :size="16" /> Filter Barang
-                </span>
-                <span class="filter-toggle__icon">+</span>
-            </button>
-
-            <form method="GET" action="{{ route('catalog.index') }}" class="card" style="padding:20px;">
-                @foreach (['q','type','sort'] as $key)
-                    @if ($filters[$key])
-                        <input type="hidden" name="{{ $key }}" value="{{ $filters[$key] }}">
-                    @endif
-                @endforeach
-
-                <h2>Filter Barang</h2>
-
-                <div class="filter-body" id="filterBody">
-                    <div class="field">
-                        <label for="category">Kategori</label>
-                        <select id="category" name="category" class="input">
-                            <option value="">Semua Kategori</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category->id }}" @selected($filters['category'] == $category->id)>
-                                    {{ $category->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="field">
-                        <label for="location">Lokasi</label>
-                        <select id="location" name="location" class="input">
-                            <option value="">Semua Lokasi</option>
-                            @foreach ($locations as $location)
-                                <option value="{{ $location }}" @selected($filters['location'] === $location)>
-                                    {{ $location }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="field">
-                        <label for="from">Dari Tanggal</label>
-                        <input id="from" type="date" name="from" value="{{ $filters['from'] }}" class="input">
-                    </div>
-
-                    <div class="field">
-                        <label for="to">Sampai Tanggal</label>
-                        <input id="to" type="date" name="to" value="{{ $filters['to'] }}" class="input">
-                    </div>
-
-                    <button type="submit" class="btn btn--primary btn--block">Terapkan Filter</button>
-                    <a href="{{ route('catalog.index') }}" class="link-reset">Reset Filter</a>
+                <div class="filter-group">
+                    <label for="category" class="field-label">Kategori</label>
+                    <select id="category" name="category" class="pill-select">
+                        <option value="">Semua Kategori</option>
+                        @foreach ($categories ?? [] as $cat)
+                            <option value="{{ $cat->id }}" {{ ($filters['category'] ?? '') == $cat->id ? 'selected' : '' }}>
+                                {{ $cat->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
+
+                <div class="filter-group">
+                    <label for="location" class="field-label">Lokasi</label>
+                    <select id="location" name="location" class="pill-select">
+                        <option value="">Semua Lokasi</option>
+                        @foreach ($locations ?? [] as $loc)
+                            <option value="{{ $loc }}" {{ ($filters['location'] ?? '') === $loc ? 'selected' : '' }}>
+                                {{ $loc }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="from" class="field-label">Dari Tanggal</label>
+                    <input type="date" id="from" name="from" value="{{ $filters['from'] ?? '' }}" class="pill-input">
+                </div>
+
+                <div class="filter-group">
+                    <label for="to" class="field-label">Sampai Tanggal</label>
+                    <input type="date" id="to" name="to" value="{{ $filters['to'] ?? '' }}" class="pill-input">
+                </div>
+
+                <div class="filter-group">
+                    <label for="sort" class="field-label">Urutkan</label>
+                    <select id="sort" name="sort" class="pill-select">
+                        <option value="terbaru" {{ ($filters['sort'] ?? 'terbaru') === 'terbaru' ? 'selected' : '' }}>Terbaru</option>
+                        <option value="terlama" {{ ($filters['sort'] ?? '') === 'terlama' ? 'selected' : '' }}>Terlama</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-black" style="width:100%; margin-bottom:0.55rem;">
+                    Terapkan Filter
+                </button>
+                <a href="{{ route('catalog.index', ['campus' => $campusSlug]) }}"
+                   style="display:block; text-align:center; padding:0.65rem; border-radius:999px; background:#ffffff; color:#374151; font-size:0.82rem; font-weight:700; text-decoration:none;">
+                    Reset Filter
+                </a>
             </form>
-
-            <div class="card panel panel--mint" style="display:flex;flex-direction:column;gap:8px;">
-                <div style="display:flex;align-items:center;gap:8px;">
-                    <x-icon name="shield-check" :size="20" />
-                    <strong style="font-size:14px;">Aman &amp; Terverifikasi</strong>
-                </div>
-                <small style="line-height:1.6;color:#065f46;font-size:12.5px;">
-                    Semua serah terima barang divalidasi oleh pos satpam kampus dengan <strong>Kode Serah Terima Unik</strong>.
-                </small>
-            </div>
         </aside>
 
-        {{-- Results --}}
-        <section class="results" aria-label="Daftar barang">
-            {{-- Tabs --}}
-            <nav class="tabs" aria-label="Filter tipe barang">
-                @foreach ([
-                    ['value' => null,       'label' => 'Semua Barang'],
-                    ['value' => 'hilang',   'label' => 'Barang Hilang'],
-                    ['value' => 'ditemukan','label' => 'Barang Temuan'],
-                ] as $tab)
-                    <a href="{{ route('catalog.index', array_filter([...request()->except('type','page'), 'type' => $tab['value']])) }}"
-                       class="tab {{ $filters['type'] === $tab['value'] ? 'is-active' : '' }}">
-                        {{ $tab['label'] }}
-                    </a>
-                @endforeach
-            </nav>
+        {{-- Kolom Kanan: Search & Daftar Kartu Barang --}}
+        <div>
+            <form method="GET" action="{{ route('catalog.index', ['campus' => $campusSlug]) }}" class="search-bar">
+                @if ($activeType)<input type="hidden" name="type" value="{{ $activeType }}">@endif
+                @if (!empty($filters['category']))<input type="hidden" name="category" value="{{ $filters['category'] }}">@endif
+                @if (!empty($filters['location']))<input type="hidden" name="location" value="{{ $filters['location'] }}">@endif
+                @if (!empty($filters['from']))<input type="hidden" name="from" value="{{ $filters['from'] }}">@endif
+                @if (!empty($filters['to']))<input type="hidden" name="to" value="{{ $filters['to'] }}">@endif
+                @if (!empty($filters['sort']))<input type="hidden" name="sort" value="{{ $filters['sort'] }}">@endif
 
-            {{-- Sort bar --}}
-            <div class="sort-bar">
-                <span>Menampilkan <strong>{{ $items->total() }}</strong> barang</span>
-                <div class="sort-bar__links">
-                    <span style="font-size:13px;color:var(--muted);">Urutan:</span>
-                    <a href="{{ route('catalog.index', array_filter([...request()->except('sort','page'), 'sort' => 'terbaru'])) }}"
-                       class="sort-link {{ $filters['sort'] === 'terbaru' ? 'is-active' : '' }}">Terbaru</a>
-                    <span style="color:var(--muted-light);">&middot;</span>
-                    <a href="{{ route('catalog.index', array_filter([...request()->except('sort','page'), 'sort' => 'terlama'])) }}"
-                       class="sort-link {{ $filters['sort'] === 'terlama' ? 'is-active' : '' }}">Terlama</a>
-                </div>
-            </div>
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ $filters['q'] ?? '' }}"
+                    placeholder="Cari nama barang, ciri, atau deskripsi..."
+                    class="pill-input"
+                >
+                <button type="submit" class="btn-black">Cari</button>
+            </form>
 
             @if ($items->isEmpty())
-                <div class="empty-state">
-                    <x-icon name="search" :size="40" />
-                    <h3>Belum Ada Barang yang Cocok</h3>
-                    <p>Coba gunakan kata kunci lain atau ubah pengaturan filter di sebelah kiri.</p>
-                    <a href="{{ route('catalog.index') }}" class="btn btn--primary">Reset Pencarian</a>
+                <div class="glass-panel" style="text-align:center; padding:3rem 1.5rem;">
+                    <p style="font-size:1.05rem; font-weight:800; color:#111111;">Belum ada barang yang cocok.</p>
+                    <p style="font-size:0.85rem; color:#4b5563; margin-top:0.35rem;">
+                        Pastikan laporan sudah disetujui admin atau coba reset filter pencarian.
+                    </p>
                 </div>
             @else
-                <div class="grid">
+                <div class="items-grid">
                     @foreach ($items as $item)
-                        <x-item-card :item="$item" />
+                        @php
+                            $isFound = in_array($item->type, ['found', 'ditemukan']);
+                        @endphp
+                        <article class="item-card">
+                            @if ($item->image)
+                                <img src="{{ asset('storage/' . $item->image) }}" alt="{{ $item->title }}" class="card-thumb">
+                            @else
+                                <div class="card-thumb">Tanpa Foto Publik</div>
+                            @endif
+
+                            <div class="card-body">
+                                <div class="badge-row">
+                                    <span class="pill-badge {{ $isFound ? 'badge-found' : 'badge-lost' }}">
+                                        {{ $isFound ? 'Ditemukan' : 'Hilang' }}
+                                    </span>
+
+                                    @if ($item->status === 'claim_in_progress')
+                                        <span class="pill-badge badge-progress">Proses Klaim</span>
+                                    @elseif ($item->status === 'returned')
+                                        <span class="pill-badge badge-returned">Dikembalikan</span>
+                                    @else
+                                        <span style="font-size:0.74rem; color:#6b7280; font-weight:600;">
+                                            {{ $item->category->name ?? 'Umum' }}
+                                        </span>
+                                    @endif
+                                </div>
+
+                                <h3 class="card-title">{{ $item->title }}</h3>
+
+                                <div class="card-meta">
+                                    <div>📍 {{ $item->location }}</div>
+                                    <div>📅 {{ \Carbon\Carbon::parse($item->date_event)->translatedFormat('d M Y') }}</div>
+                                </div>
+
+                                <p class="card-desc">{{ $item->description }}</p>
+
+                                <a href="{{ route('items.show', ['campus' => $campusSlug, 'item' => $item]) }}"
+                                   class="btn-black"
+                                   style="width:100%; padding:0.68rem 1rem; font-size:0.84rem; margin-top:auto;">
+                                    Lihat Detail
+                                </a>
+                            </div>
+                        </article>
                     @endforeach
                 </div>
 
-                <div style="margin-top:8px;">
-                    {{ $items->links('vendor.pagination.lostfound') }}
-                </div>
+                @if ($items->hasPages())
+                    <div style="margin-top:1.5rem;">
+                        {{ $items->links() }}
+                    </div>
+                @endif
             @endif
-        </section>
+        </div>
     </div>
 @endsection
